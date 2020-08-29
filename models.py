@@ -24,11 +24,11 @@ class User(db.Model):
 
     garden_id = db.Column(db.Integer, db.ForeignKey('garden.id', ondelete='CASCADE'))
 
-    plants = db.relationships('Plants', secondary='garden')
+    plants = db.relationship('Plants', secondary='garden')
 
     def __repr__(self):
         """Tell on yourself"""
-        return f'[User: #{self.id}, {self.username}, {self.email}, {self.fully_set_up}']
+        return f'[User: #{self.id}, {self.username}, {self.email}, {self.fully_set_up}]'
 
     @classmethod
     def register(cls, username, email, password, profile_pic_url):
@@ -36,7 +36,7 @@ class User(db.Model):
 
         password_hash = bcrypt.generate_password_hash(password).decode('utf8')
 
-        user = User(username=username, email=email, profile_pic_url=profile_pic_url password=password)
+        user = User(username=username, email=email, profile_pic_url=profile_pic_url, password=password)
 
         db.session.add(user)
         return user
@@ -60,7 +60,7 @@ class Plants(db.Model):
     
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     plant_name = db.Column(db.Text, nullable=False)
-    plant_birthday = db.Column(db.DateTime, nullable=True)
+    plant_birthday = db.Column(db.DateTime)
     last_watered = db.Column(db.DateTime, default=datetime.utcnow())
     last_trimmed = db.Column(db.DateTime, default=datetime.utcnow())
     last_repotted = db.Column(db.DateTime, default=datetime.utcnow())
