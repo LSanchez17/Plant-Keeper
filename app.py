@@ -1,6 +1,8 @@
 import os
 
 from flask import Flask, render_template, request, flash, redirect, session, g
+from sqlalchemy.exc import IntegrityError
+
 from forms import RegisterForm, AddPlantForm, EditPlantForm, TutorialForm, GardenForm
 from models import db, connect_db, User, Plants, Weather, Garden
 
@@ -47,10 +49,45 @@ def do_logout():
 #Routes with no forms
 @app.route('/')
 def landing_page():
+    """Basic landing page"""
 
     return render_template('index.html')
 
+@app.route('/register', methods=['GET','POST'])
+def register():
+    """Register a new user"""
+    form = RegisterForm()
+	
+    if form.validate_on_submit():
+        try:
+            new_user = User.register(
+                username=form.username.data,
+                email=form.email.data,
+                password=form.password.data,
+                profile_pic_url=form.pic_url.data
+            )
 
+            db.session.commit()
+
+            session['user_id'] = new_user.username
+
+        except IntegrityError:
+            flash('Username already exists', 'danger')
+            
+            return render_template('register.html', form=form)
+
+        do_login(user)
+
+        return redirect('/')
+
+    else:
+        return render_template('register.html', form=form)
+
+@app.route('/login')
+def login():
+    """Log into page and find user"""
+
+    return render_template('login.html')
 
 #######################################################
 

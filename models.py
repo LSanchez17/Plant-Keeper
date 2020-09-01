@@ -7,10 +7,12 @@ from flask_bcrypt import Bcrypt
 db = SQLAlchemy()
 bcrypt = Bcrypt()
 
+DEFAULT_IMG = '/static/user_default.png'
+
 class User(db.Model):
     """User model"""
 
-    __tablename__ = 'users'
+    __tablename__ = 'user'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     username = db.Column(db.Text, nullable=False, unique=True)
@@ -22,9 +24,8 @@ class User(db.Model):
     password = db.Column(db.Text, nullable=False)
     fully_set_up = db.Column(db.Boolean, default=False)
 
-    garden_id = db.Column(db.Integer, db.ForeignKey('garden.id', ondelete='CASCADE'))
-
-    plants = db.relationship('Plants', secondary='garden')
+    plants = db.relationship('Plants', secondary='garden', backref='owner')
+    weather = db.relationship('Weather', backref='owner')
 
     def __repr__(self):
         """Tell on yourself"""
@@ -36,7 +37,7 @@ class User(db.Model):
 
         password_hash = bcrypt.generate_password_hash(password).decode('utf8')
 
-        user = User(username=username, email=email, profile_pic_url=profile_pic_url, password=password)
+        user = User(username=username, email=email, profile_pic_url=profile_pic_url or DEFAULT_IMG, password=password)
 
         db.session.add(user)
         return user
@@ -56,7 +57,7 @@ class User(db.Model):
 class Plants(db.Model):
     """Plant model"""
 
-    __tablename__ = 'plants'
+    __tablename__ = 'plant'
     
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     plant_name = db.Column(db.Text, nullable=False)
@@ -66,12 +67,14 @@ class Plants(db.Model):
     last_repotted = db.Column(db.DateTime, default=datetime.utcnow())
     indoor = db.Column(db.Boolean, default=True)
 
-    user = db.relationship('User', secondary='garden')
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'))
+
+    gardens = db.relationship('User', secondary='garden', backref='owner')
+
 
     def __repr__(self):
         """Quick plant info"""
         return f'[Plant: #{self.id}, {self.plant_name}, {self.user}]'
-
 
 class Weather(db.Model):
     """Weather data model"""
@@ -89,20 +92,26 @@ class Weather(db.Model):
         return f'[Weather: {self.location}: {self.date}-{self.forecast}]'
 
 class Garden(db.Model):
+    """
+    Many plants can be long to many gardens, and user can have many 
+    gardens and many plants all at once
+    """
 
     __tablename__ = 'garden'
 
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id = db.Column(db.Integer, primary_key=True)
+    plant_id = db.Column(db.Integer, db.ForeignKey('plant.id', ondelete='CASCADE'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCASDE'))
     name = db.Column(db.Text, nullable=False)
 
-    plant_id = db.Column(db.Integer, db.ForeignKey('plants.id', ondelete='CASCADE'))
-
-    plant_name = db.relationship(Plants, backref=backref('garden', cascade='all, delete-orphan'))
-    user = db.relationship(User, backref=backref('users', cascade='all, delete-orphan'))
+    user = relationship(User, backref=backref('garden', cascade='all, delete-orphan'))
+    plant = relationship(Plants, backref=backref('garden', cascade='all, delete-orphan'))
 
     def __repr__(self):
         """Garden info"""
         return f'[Garden: {self.name}-{self.user}, {self.plant_id}]'
+
+cl
 
 def connect_db(app):
     """Connect this database"""

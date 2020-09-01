@@ -6,9 +6,10 @@ from wtforms.validators import DataRequired, Email, Length, Optional
 class RegisterForm(FlaskForm):
     """Form for registering messages."""
 
-    username = TextAreaField('Username:', validators=[DataRequired()])
+    username = StringField('Username:', validators=[DataRequired()])
     email = StringField('Email:', validators=[DataRequired(), Email()])
     password = PasswordField('Password:', validators=[DataRequired()])
+    pic_url = StringField('Profile Picture URL:', validators=[Optional()])
 
 class AddPlantForm(FlaskForm):
     """Form for adding a plant to user's garden"""

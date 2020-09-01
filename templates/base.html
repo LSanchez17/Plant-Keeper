@@ -10,8 +10,8 @@
 <ul>
     <li><a>My Plants</a></li>
     <li><a>Weather</a></li>
-    <li><a><img></a></li>
-    {% if g %}
+    {% if g.user %}
+        <li><a><img src={{g.profile_pic_url}}></a></li>
         <li><a>Logout</a></li>
     {% endif %}
 </ul>
@@ -19,6 +19,9 @@
 
 <body>
     {% block content %}
+
+
+    {% endblock %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.20.0/axios.min.js" integrity="sha512-quHCp3WbBNkwLfYUMd+KwBAgpVukJu5MncuQaWXgCrfgcxCJAq/fo+oqrRKOj+UKEmyMCG3tb8RB63W+EmrOBg==" crossorigin="anonymous"></script>
 </body>
 </html>
