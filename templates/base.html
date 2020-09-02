@@ -3,20 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-    <title>Plant-Keeper</title>
-</head>
-<nav>
-<ul>
-    <li><a>My Plants</a></li>
-    <li><a>Weather</a></li>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">    <title>Plant-Keeper</title>
     {% if g.user %}
-        <li><a><img src={{g.profile_pic_url}}></a></li>
-        <li><a>Logout</a></li>
+    <nav class='navbar fixed-top navbar-dark bg-light'>
+        <ul class='nav justify-content-center'>
+            <li class='navbar-brand'><a href='/' class='nav-link active'><img src='/static/logo.png' style='width:30px;height:30px'> Home</a></li>
+            <li class='navbar-brand'><a href=f'/{g.username}/plants' class='nav-link'><img src='/static/add-plant-icon.png' style='width:30px;height:30px'> My Plants</a></li>
+            <li class='navbar-brand'><a href='/weather' class='nav-link'><img src='/static/weather/calendar.png' style='width:30px;height:30px'> Weather</a></li>
+            {% if g.user %}
+                <li class='navbar-brand'><a href='/account' class='nav-link'><img src={{g.user.profile_pic_url}} style='width:30px;height:30px'>  Account Info</a></li>
+                <li class='navbar-brand'><a href='/logout' class='nav-link'>Logout</a></li>
+            {% endif %}
+        </ul>
+    </nav>
     {% endif %}
-</ul>
-</nav>
-
+</head>
 <body>
     {% block content %}
 

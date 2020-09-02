@@ -11,6 +11,12 @@ class RegisterForm(FlaskForm):
     password = PasswordField('Password:', validators=[DataRequired()])
     pic_url = StringField('Profile Picture URL:', validators=[Optional()])
 
+class LoginForm(FlaskForm):
+    """Form for logging in messages."""
+
+    username = StringField('Username:', validators=[DataRequired()])
+    password = PasswordField('Password:', validators=[DataRequired()])
+
 class AddPlantForm(FlaskForm):
     """Form for adding a plant to user's garden"""
 
@@ -37,7 +43,6 @@ class TutorialForm(FlaskForm):
     last_name = StringField('Last name:', validators=[DataRequired()])
     profile_pic_url = StringField('Profile picture URL', validators=[DataRequired()])
     location = StringField('Zip Code', validators=[DataRequired()])
-    garden_name = StringField('Garden name:', validators=[DataRequired()])
 
 class GardenForm(FlaskForm):
     """For for editing garden"""

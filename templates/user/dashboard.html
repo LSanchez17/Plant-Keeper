@@ -1,0 +1,55 @@
+
+{% block body %}
+
+
+<div class='container text-center'>
+    <h2 class='card-title text-dark'>Welcome {{g.user.username}}</h2>
+</div>
+
+  <div class="card-deck container-fluid">
+    <!--We need to loop here over any user gardens to make sure display them all-->
+    <div class="card border-success">
+        <div class="card-body">
+          <h4 class="card-title">GARDEN_NAME_HERE</h4>
+          <p class="card-text">
+          TOTAL NUMBER OF PLANTS IN IT
+          </p>
+          <button class='btn btn-sm btn-primary'>
+              <a href="/garden/edit" class="card-link text-white">Edit Garden</a>
+          </button>
+        </div>
+    </div>
+
+    <!--Here we have to get the current weather from API, use javascript-->
+    <div class="card border-secondary">
+        <div class="card-body">
+          <h4 class="card-title">Current Forecast</h4>
+          <h6 class="card-subtitle mb-2 text-muted">DAY_OF_WEEK</h6>
+          <p class="card-text">
+            ENTER FORECAST HERE, QUICK NOTES
+          </p>
+          <button class='btn btn-sm btn-primary'>
+            <a href="/weather" class="card-link text-white">Forecast Details</a>
+          </button>
+     </div>
+   </div>
+
+   <!--Here we loop through any tasks that need to be done and add them as a list-->
+   <div class="card border-danger">
+    <div class="card-body">
+      <h4 class="card-title">Reminders</h4>
+      <ul class='list'>
+        <li>
+        <h6 class="card-subtitle mb-2 text-muted">TASK</h6>
+          <p class="card-text">
+            DESCRIPTION OF TASK TO DO
+          </p>
+        <button class='btn btn-sm btn-warning'>
+          <a href="/clear_task" class="card-link text-white">Clear Task</a>
+        </button>
+        </li>
+      </ul>
+    </div>
+   </div>
+  </div>
+{% endblock %}

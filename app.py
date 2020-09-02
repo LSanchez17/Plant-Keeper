@@ -3,7 +3,7 @@ import os
 from flask import Flask, render_template, request, flash, redirect, session, g
 from sqlalchemy.exc import IntegrityError
 
-from forms import RegisterForm, AddPlantForm, EditPlantForm, TutorialForm, GardenForm
+from forms import RegisterForm, LoginForm, AddPlantForm, EditPlantForm, TutorialForm, GardenForm
 from models import db, connect_db, User, Plants, Weather, Garden
 
 LOGGED_IN_USER = ""
@@ -46,12 +46,27 @@ def do_logout():
 ######################################################
 
 
-#Routes with no forms
-@app.route('/')
+#Routes for user methodology
+@app.route('/', methods=['GET','POST'])
 def landing_page():
     """Basic landing page"""
+    form = TutorialForm()
 
-    return render_template('index.html')
+    if form.validate_on_submit():
+        which_user = User.query.get_or_404(g.user.id)
+
+        which_user.first_name = form.first_name.data
+        which_user.last_name = form.last_name.data
+        which_user.profile_pic_url = form.profile_pic_url.data
+        which_user.location = form.location.data
+        which_user.fully_set_up = True
+        
+
+        db.session.add(which_user)
+        db.session.commit()
+        return redirect('/')
+
+    return render_template('index.html', form=form)
 
 @app.route('/register', methods=['GET','POST'])
 def register():
@@ -76,20 +91,34 @@ def register():
             
             return render_template('register.html', form=form)
 
-        do_login(user)
+        do_login(new_user)
 
         return redirect('/')
 
     else:
         return render_template('register.html', form=form)
 
-@app.route('/login')
+@app.route('/login', methods=['GET','POST'])
 def login():
     """Log into page and find user"""
+    form = LoginForm()
 
-    return render_template('login.html')
+    if form.validate_on_submit():
+        which_user = User.authentication(form.username.data, form.password.data)
 
-#######################################################
+        if which_user:
+            do_login(which_user)
+            flash(f'Login succesful!', 'sucess')
+            return redirect('/')
+        else:
+            flash(f'Invalid credentials','danger')
 
+    return render_template('login.html', form=form)
 
-#Form Routes
+@app.route('/logout')
+def logout():
+    """Log user out and clear g/session"""
+    do_logout()
+    flash(f'Logout succesful! See ya later')
+    return redirect('/')
+

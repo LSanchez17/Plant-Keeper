@@ -1,6 +1,6 @@
 """Models for capstone"""
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.orm import backref
+from sqlalchemy.orm import backref, relationship
 from datetime import datetime
 from flask_bcrypt import Bcrypt
 
@@ -24,7 +24,7 @@ class User(db.Model):
     password = db.Column(db.Text, nullable=False)
     fully_set_up = db.Column(db.Boolean, default=False)
 
-    plants = db.relationship('Plants', secondary='garden', backref='owner')
+    plants = db.relationship('Plants', secondary='garden')
     weather = db.relationship('Weather', backref='owner')
 
     def __repr__(self):
@@ -37,7 +37,7 @@ class User(db.Model):
 
         password_hash = bcrypt.generate_password_hash(password).decode('utf8')
 
-        user = User(username=username, email=email, profile_pic_url=profile_pic_url or DEFAULT_IMG, password=password)
+        user = User(username=username, email=email, profile_pic_url=profile_pic_url or DEFAULT_IMG, password=password_hash)
 
         db.session.add(user)
         return user
@@ -69,7 +69,7 @@ class Plants(db.Model):
 
     user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'))
 
-    gardens = db.relationship('User', secondary='garden', backref='owner')
+    gardens = db.relationship('User', secondary='garden')
 
 
     def __repr__(self):
@@ -85,7 +85,7 @@ class Weather(db.Model):
     date = db.Column(db.DateTime, nullable=False)
     forecast = db.Column(db.Text, nullable=False)
 
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'))
 
     def __repr__(self):
         """Quick weather check"""
@@ -101,7 +101,7 @@ class Garden(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     plant_id = db.Column(db.Integer, db.ForeignKey('plant.id', ondelete='CASCADE'))
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCASDE'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'))
     name = db.Column(db.Text, nullable=False)
 
     user = relationship(User, backref=backref('garden', cascade='all, delete-orphan'))
@@ -110,8 +110,6 @@ class Garden(db.Model):
     def __repr__(self):
         """Garden info"""
         return f'[Garden: {self.name}-{self.user}, {self.plant_id}]'
-
-cl
 
 def connect_db(app):
     """Connect this database"""

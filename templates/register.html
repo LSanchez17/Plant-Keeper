@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<br />
     <form id='register-user-form' class='form-control' method='POST'>
         {{form.hidden_tag() }}
             {% for field in form 
@@ -14,7 +13,7 @@
             {% endfor %}
             </div>
             {% endfor %}
-            <button type='submit'>Register</button>
+            <button class='btn btn-md btn-success' type='submit'>Register</button>
+            <button class='btn btn-md btn-warning'><a href='/'>Return</a></button>
     </form>
-    <br />
 {% endblock %}

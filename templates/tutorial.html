@@ -1,0 +1,22 @@
+
+<h2 class='text'>
+    <button id='tutorial'>Welcome to the Plant-Keeper, please answer a couple of questions to get started...</button>
+</h2>
+
+<form id='tutorial-user-form' class='form-control hidden' method='POST'>
+    {{form.hidden_tag() }}
+        {% for field in form 
+            if field.widget.input_type != 'hidden' %}
+        <div>
+        <h2>{{field.label}}</h2>
+        <p>{{field}}</p>
+        {% for error in field.errors %}
+            {{error}}
+        {% endfor %}
+        </div>
+        {% endfor %}
+        <button type='submit'>Register</button>
+</form>
+<br />
+
+<script src='/static/scripts/tutorial.js'></script>

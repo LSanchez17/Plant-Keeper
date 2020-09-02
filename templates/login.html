@@ -1,4 +1,20 @@
 {% extends 'base.html' %}
+
 {% block content %}
+    <form id='login-user-form' class='form-control' method='POST'>
+        {{form.hidden_tag() }}
+            {% for field in form 
+                if field.widget.input_type != 'hidden' %}
+            <div>
+            <h2>{{field.label}}</h2>
+            <p>{{field}}</p>
+            {% for error in field.errors %}
+                {{error}}
+            {% endfor %}
+            </div>
+            {% endfor %}
+            <button class='btn btn-md btn-success' type='submit'>Login</button>
+            <button class='btn btn-md btn-warning'><a href='/'>Return</a></button>
+    </form>
 
 {% endblock %}
