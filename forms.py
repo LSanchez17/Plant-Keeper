@@ -2,6 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, DateField, TextAreaField, BooleanField, SelectField
 from wtforms.validators import DataRequired, Email, Length, Optional
 
+from datetime import date
 
 class RegisterForm(FlaskForm):
     """Form for registering messages."""
@@ -21,10 +22,10 @@ class AddPlantForm(FlaskForm):
     """Form for adding a plant to user's garden"""
 
     plant_name = StringField('Plant Name(common or scientific):', validators=[DataRequired()])
-    plant_birthday = StringField('Date of purchase:', validators=[DataRequired()])
-    last_watered = DateField('Last date watered', validators=[Optional()])
-    last_trimmed = DateField('Last date trimmed', validators=[Optional()])
-    last_repotted = DateField('Last date repotted', validators=[Optional()])
+    plant_birthday = StringField('Date of purchase(Y:M:D):', default=date.today(), validators=[DataRequired()])
+    last_watered = DateField('Last date watered(Y:M:D)', default=date.today(), validators=[Optional()])
+    last_trimmed = DateField('Last date trimmed(Y:M:D)', default=date.today(), validators=[Optional()])
+    last_repotted = DateField('Last date repotted(Y:M:D)', default=date.today(), validators=[Optional()])
     indoor = BooleanField('Indoor plant?', validators=[DataRequired()])
 
 

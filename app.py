@@ -5,6 +5,7 @@ from sqlalchemy.exc import IntegrityError
 
 from forms import RegisterForm, LoginForm, AddPlantForm, EditPlantForm, TutorialForm, GardenForm
 from models import db, connect_db, User, Plants, Weather, Garden
+from api_logic import *
 
 LOGGED_IN_USER = ""
 
@@ -49,7 +50,10 @@ def do_logout():
 #Routes for user methodology
 @app.route('/', methods=['GET','POST'])
 def landing_page():
-    """Basic landing page"""
+    """Basic landing page, shows login/register on template if not stored in local G object
+       If stored in local g object, we show them a tutorial form so we can set up user account better
+       Once user is set up, they can begin doing plant stuff
+    """
     form = TutorialForm()
 
     if form.validate_on_submit():
@@ -108,7 +112,7 @@ def login():
 
         if which_user:
             do_login(which_user)
-            flash(f'Login succesful!', 'sucess')
+            flash(f'Login succesful!', 'success')
             return redirect('/')
         else:
             flash(f'Invalid credentials','danger')
@@ -119,6 +123,78 @@ def login():
 def logout():
     """Log user out and clear g/session"""
     do_logout()
-    flash(f'Logout succesful! See ya later')
+    flash(f'Logout succesful! See ya later','success')
     return redirect('/')
 
+#####################################################
+#Routes for plants
+@app.route('/<int:user_id>/plants')
+def plant_page(user_id):
+    """Displays plants tied to this user"""
+    if not g.user:
+        flash('Access unauthorized', 'danger')
+        return redirect("/")
+
+    which_user = User.query.get_or_404(user_id)
+    which_plants = Plants.query.filter(Plants.user_id == which_user.id)
+
+    return render_template('plants/plants_page.html', plants=which_plants)
+
+@app.route('/<int:user_id>/plants/add', methods=['GET','POST'])
+def add_plants(user_id):
+    """Adds a plant to this user's account"""
+    if not g.user:
+        flash('Access unauthorized', 'danger')
+        return redirect("/")
+    
+    which_user = User.query.get_or_404(user_id)
+    form = AddPlantForm()
+
+    if form.validate_on_submit():
+        new_plant = Plants(
+                    plant_name = form.plant_name.data,
+                    plant_birthday = form.plant_birthday.data,
+                    last_watered = form.last_watered.data or form.last_watered.default,
+                    last_trimmed = form.last_trimmed.data or form.last_trimmed.default,
+                    last_repotted = form.last_repotted.data or form.last_repotted.default,
+                    indoor = form.indoor.data,
+                    user_id = which_user.id
+                    )
+        
+        db.session.add(new_plant)
+        db.session.commit()
+    
+        flash('Plant added successfully!', 'success')
+        return redirect(f'/{g.user.id}/plants')
+    else:
+        flash('Could not add plant, check your input', 'danger')
+        return render_template('/plants/add_plant.html', form=form)
+
+    return render_template('/plants/add_plant.html', form=form)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+###########################################################################
+###########################################################################
+########################DELETE ME AFTER HEROKU DEPLOYMENT##################
+
+@app.after_request
+def add_header(req):
+    """Add non-caching headers on every request."""
+
+    req.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    req.headers["Pragma"] = "no-cache"
+    req.headers["Expires"] = "0"
+    req.headers['Cache-Control'] = 'public, max-age=0'
+    return req

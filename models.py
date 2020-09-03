@@ -52,7 +52,7 @@ class User(db.Model):
             authorized = bcrypt.check_password_hash(user.password, password)
             if authorized:
                 return user
-        return false
+        return False
 
 class Plants(db.Model):
     """Plant model"""
