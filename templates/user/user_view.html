@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class='container-fluid'>
+    <h3 class='text-black'>Good day {{g.user.username}}</h3>
+    <h3>You currently have PLANT_TOTAL registered to your account</h3>
+    <h3>You currently have GARDEN_TOTAL registered to your account</h3>
+    <h3>You have X_NOTIFICATIONS awaiting you on your dashboard</h3>
+    <br />
+    <button class='btn btn-sm btn-secondary'>
+        <a href='/{{g.user.id}}/account/edit' class='text-white'>Edit Info</a>
+    </button>
+</div>
+{% endblock %}

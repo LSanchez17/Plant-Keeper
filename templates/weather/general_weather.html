@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Displaying general weather for area</h1>
+
+    <h2>Foreast summary</h2>
+
+    <button class='btn btn-primary'>
+        <a href='/weather/{{g.user.id}}' class='text-white'>{{g.user.username}}'s weather</a>
+    </button>
+
+{% endblock %}

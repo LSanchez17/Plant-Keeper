@@ -14,7 +14,7 @@
             <li class='navbar-brand'><a href='/{{g.user.id}}/plants' class='nav-link text-white'><img src='/static/add-plant-icon.png' style='width:30px;height:30px'> My Plants</a></li>
             <li class='navbar-brand'><a href='/weather' class='nav-link text-white'><img src='/static/weather/calendar.png' style='width:30px;height:30px'> Weather</a></li>
             {% if g.user %}
-                <li class='navbar-brand'><a href='/account' class='nav-link text-white'><img src={{g.user.profile_pic_url}} style='width:30px;height:30px'>  Account Info</a></li>
+                <li class='navbar-brand'><a href='/{{g.user.id}}/account' class='nav-link text-white'><img src={{g.user.profile_pic_url}} style='width:30px;height:30px'>  Account Info</a></li>
                 <li class='navbar-brand'><a href='/logout' class='nav-link text-white'>Logout</a></li>
             {% endif %}
         </ul>
@@ -22,7 +22,7 @@
     {% endif %}
 </head>
 <body>
-    
+
     <div class='container'>
         {% for category, message in get_flashed_messages(with_categories=True) %}
           <div class="alert alert-{{ category }}">{{ message }}</div>

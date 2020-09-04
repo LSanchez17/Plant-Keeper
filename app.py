@@ -3,7 +3,7 @@ import os
 from flask import Flask, render_template, request, flash, redirect, session, g
 from sqlalchemy.exc import IntegrityError
 
-from forms import RegisterForm, LoginForm, AddPlantForm, EditPlantForm, TutorialForm, GardenForm
+from forms import RegisterForm, LoginForm, AddPlantForm, EditPlantForm, TutorialForm, GardenForm, EditUserInformation
 from models import db, connect_db, User, Plants, Weather, Garden
 from api_logic import *
 
@@ -167,19 +167,78 @@ def add_plants(user_id):
         flash('Plant added successfully!', 'success')
         return redirect(f'/{g.user.id}/plants')
     else:
-        flash('Could not add plant, check your input', 'danger')
         return render_template('/plants/add_plant.html', form=form)
 
     return render_template('/plants/add_plant.html', form=form)
 
+@app.route('/<int:user_id>/plants/edit/<int:plant_id>', methods=['GET','POST'])
+def edit_plants(user_id, plant_id):
+    """Lets user update information on current plants attached to their account"""
+    which_user = User.query.get_or_404(user_id)
+
+    form = EditPlantForm()
+
+    if form.validate_on_submit():
+        which_plant = Plants.query.get_or_404(plant_id)
+
+        which_plant.last_watered = form.last_watered.data
+        which_plant.last_trimmed = form.last_trimmed.data
+        which_plant.last_repotted = form.last_repotted.data
+        which_plant.indoor = form.indoor.data or False
+
+        db.session.add(which_plant)
+        db.session.commit()
+
+        flash('Plant editted successfully!', 'Sucess')
+        return redirect(f'/{g.user.id}/plants')
+    
+    return render_template('/plants/edit_plants.html', form=form)
+
+###########################################################################
+#USER ACCOUNT EDIT INFORMATION
+@app.route('/<int:user_id>/account')
+def view_account(user_id):
+    """View user account"""
+    which_user = User.query.get_or_404(user_id)
+    list_of_plants = which_user.plants
+
+    return render_template('/user/user_view.html', user=which_user, plant_list=list_of_plants)
+
+@app.route('/<int:user_id>/account/edit')
+def edit_account(user_id):
+    """Edit user information"""
+    which_user = User.query.get_or_404(user_id)
+    form = EditUserInformation()
+
+    if form.validate_on_submit():
+        which_user.email = form.email.data or which_user.email
+        which_user.first_name = form.first_name.data or which_user.first_name
+        which_user.last_name = form.last_name.data or which_user.last_name
+        which_user.profile_pic_url = form.profile_pic_url.data or which_user.profile_pic_url
+        which_user.location = form.location.data or which_user.location
+
+        db.session.add(which_user)
+        db.session.commit()
+
+        flash('Information updated!', 'success')
+        return redirect(f'/{g,user.id}/account')
+
+    return render_template('/user/user_edit.html', form=form)
 
 
+###########################################################################
+# Weather API reporting
+@app.route('/weather')
+def general_weather():
+    """Shows current country forecast"""
 
+    return render_template('/weather/general_weather.html')
 
+@app.route('/weather/<int:user_id>')
+def user_weather(user_id):
+    """Displays user's local weather"""
 
-
-
-
+    return render_template('/weather/user_weather.html')
 
 
 

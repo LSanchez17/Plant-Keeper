@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, DateField, TextAreaField, BooleanField, SelectField
+from wtforms import StringField, PasswordField, DateField, TextAreaField, BooleanField, SelectField, IntegerField
 from wtforms.validators import DataRequired, Email, Length, Optional
 
 from datetime import date
@@ -18,6 +18,15 @@ class LoginForm(FlaskForm):
     username = StringField('Username:', validators=[DataRequired()])
     password = PasswordField('Password:', validators=[DataRequired()])
 
+class EditUserInformation(FlaskForm):
+    """Form for editing user information"""
+
+    email = StringField('Email: ', validators=[Optional(), Email()])
+    first_name = StringField('First name: ', validators=[Optional()])
+    last_name = StringField('Last name: ', validators=[Optional()])
+    profile_pic_url = StringField('New profile pic URL: ', validators=[Optional()])
+    location = IntegerField('Zip Code: ', validators=[Optional()])
+
 class AddPlantForm(FlaskForm):
     """Form for adding a plant to user's garden"""
 
@@ -32,18 +41,18 @@ class AddPlantForm(FlaskForm):
 class EditPlantForm(FlaskForm):
     """Login form."""
 
-    last_watered = DateField('Last date watered', validators=[Optional()])
-    last_trimmed = DateField('Last date trimmed', validators=[Optional()])
-    last_repotted = DateField('Last date repotted', validators=[Optional()])
-    indoor = BooleanField('Indoor plant?', validators=[DataRequired()])
-    garden_residency = SelectField('Which garden?', validators=[DataRequired()])
+    last_watered = DateField('Date last watered', validators=[Optional()])
+    last_trimmed = DateField('Date last trimmed', validators=[Optional()])
+    last_repotted = DateField('Date last repotted', validators=[Optional()])
+    indoor = BooleanField('Indoor plant?', validators=[Optional()])
+    # garden_residency = SelectField('Which garden?', validators=[DataRequired()])
 
 class TutorialForm(FlaskForm):
     """Tutorial form for inserting basic user information"""
     first_name = StringField('First name:', validators=[DataRequired()])
     last_name = StringField('Last name:', validators=[DataRequired()])
     profile_pic_url = StringField('Profile picture URL', validators=[DataRequired()])
-    location = StringField('Zip Code', validators=[DataRequired()])
+    location = IntegerField('Zip Code', validators=[DataRequired()])
 
 class GardenForm(FlaskForm):
     """For for editing garden"""

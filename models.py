@@ -20,7 +20,7 @@ class User(db.Model):
     first_name = db.Column(db.Text)
     last_name = db.Column(db.Text)
     profile_pic_url = db.Column(db.Text, default='/static/user_default.png')
-    location = db.Column(db.Text)
+    location = db.Column(db.Integer)
     password = db.Column(db.Text, nullable=False)
     fully_set_up = db.Column(db.Boolean, default=False)
 
