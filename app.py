@@ -5,9 +5,12 @@ from sqlalchemy.exc import IntegrityError
 
 from forms import RegisterForm, LoginForm, AddPlantForm, EditPlantForm, TutorialForm, GardenForm, EditUserInformation
 from models import db, connect_db, User, Plants, Weather, Garden
-from api_logic import *
+from api_logic import get_weather, search_plants
 
 LOGGED_IN_USER = ""
+WEATHER_API_KEY_REMOVE_ME = '8b2d74694d9e4fa0a8f1e9f7bc8f3a35'
+PLANT_API_KEY_REMOVE_ME = '7c-JHovj1mUW2xTvrfm30aMUZ1W0T9GM0p0wncztwRA'
+
 
 app = Flask(__name__)
 
@@ -230,20 +233,28 @@ def edit_account(user_id):
 # Weather API reporting
 @app.route('/weather')
 def general_weather():
-    """Shows current country forecast"""
+    """Shows current forecast"""
+    weather = get_weather(WEATHER_API_KEY_REMOVE_ME)
+    print(weather)
+    return render_template('/weather/general_weather.html', weather=weather.json())
 
-    return render_template('/weather/general_weather.html')
+###########################################################################
+@app.route('/<int:user_id>/plants/search')
+def search_for_plants(user_id):
+    """Search for plants and add them to your account"""
 
-@app.route('/weather/<int:user_id>')
-def user_weather(user_id):
-    """Displays user's local weather"""
+    return render_template('/plants/search.html')
 
-    return render_template('/weather/user_weather.html')
+@app.route('/api/plants/search', methods=['GET'])
+def return_searched_plants(plant):
+    """Calls python to make serve request, avoiding COORS NIGHTMARES"""
+    plant = request.json
+    
+    list_of_plants = search_plants(plant, PLANT_API_KEY_REMOVE_ME)
 
+    print(list_of_plants)
 
-
-
-
+    return list_of_plants
 ###########################################################################
 ###########################################################################
 ########################DELETE ME AFTER HEROKU DEPLOYMENT##################
