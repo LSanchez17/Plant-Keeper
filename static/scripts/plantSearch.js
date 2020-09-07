@@ -62,11 +62,11 @@ const filterData = (largeObj, query) => {
     return plantArray;
 }
 
-async function htmlOutput(plantName, query, image){
+async function htmlOutput(plantName, image){
     let div = document.createElement('div');
     let innerDiv = document.createElement('div');
     let innerInnerDiv = document.createElement('div');
-    let title = document.createElement('h1');
+    let title = document.createElement('h3');
     let img = document.createElement('img');
     let text = document.createElement('p');
     
@@ -93,7 +93,7 @@ async function htmlOutput(plantName, query, image){
     text.innerText = `Here is a picture of a different ${plantName}`;
 
     if(image == null || image == undefined){
-        image = await imageAPI(query);
+        image = await imageAPI(plantName);
         // console.log(image)
         text.innerText = 'Image result may not reflect an accurate representation, feature in beta';
 
@@ -131,37 +131,53 @@ async function htmlOutput(plantName, query, image){
 async function formatOutput(dataArr, query){
     let refinedData = '';
     let upperQuery = query.toUpperCase(); 
+    let errorData = [];
 
     dataArr.forEach(async plantObj => {
         // console.log(plantObj)
-            if(plantObj.common_name || plantObj.common_name.includes(upperQuery)){
-                refinedData = await htmlOutput(plantObj.common_name, query, plantObj.image_url);
+        try{
+            if(plantObj.common_name !== null || plantObj.common_name.includes(upperQuery)){
+                refinedData = await htmlOutput(plantObj.common_name, plantObj.image_url);
                 return refinedData;
             }
-            else if(plantObj.family_common_name || plantObj.family_common_name.includes(upperQuery)){
-                refinedData = await htmlOutput(plantObj.family_common_name, query, plantObj.image_url);
+            else if(plantObj.family !== null || plantObj.family.includes(upperQuery)){
+                refinedData = await htmlOutput(plantObj.family, plantObj.image_url);
                 return refinedData;
             }
-            else if(plantObj.family && plantObj.family.includes(upperQuery)){
-                refinedData = await htmlOutput(plantObj.family, query, plantObj.image_url);
+            else if(plantObj.family_common_name !== null || plantObj.family_common_name.includes(upperQuery)){
+                refinedData = await htmlOutput(plantObj.family_common_name, plantObj.image_url);
                 return refinedData;
             }
-            else if(plantObj.scientific_name && plantObj.scientific_name.includes(upperQuery)){ 
-                refinedData = await htmlOutput(plantObj.scientific_name, query, plantObj.image_url);
+            else if(plantObj.genus !== null || plantObj.genus.includes(upperQuery)){ 
+                refinedData = await htmlOutput(plantObj.genus, plantObj.image_url);
                 return refinedData;
             }
-            else if(plantObj.genus && plantObj.genus.includes(upperQuery)){
-                refinedData = await htmlOutput(plantObj.genus, query, plantObj.image_url);
+            else if(plantObj.scientific_name !== null || plantObj.scientific_name.includes(upperQuery)){
+                refinedData = await htmlOutput(plantObj.scientific_name, plantObj.image_url);
                 return refinedData;
             }
-            else if(plantObj.slug && plantObj.slug.includes(upperQuery)){
-                refinedData = await htmlOutput(plantObj.slug, query, plantObj.image_url);
+            else if(plantObj.slug !== null || plantObj.slug.includes(upperQuery)){
+                refinedData = await htmlOutput(plantObj.slug, plantObj.image_url);
                 return refinedData;
             }
             else{
                 console.log(`Sorry, something went wrong in sifting data! ${dataArr} ${Object.keys(plantObj)}`);
                 return;
             }
+        }
+        catch(e){
+            errorData.push(plantObj)
+            errorData.forEach(async key => {
+                if(key.hasOwnProperty('common_name') !== null){
+                    // console.log(`common name ${key.scientific_name}`)
+                    return await htmlOutput(key.scientific_name, key.image_url);
+                }
+                else{
+                    console.log('fail')
+                    return;
+                }
+            })
+        }
     })
 }
 
