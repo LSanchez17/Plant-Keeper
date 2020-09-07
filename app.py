@@ -1,16 +1,17 @@
 import os
+import pdb
 
 from flask import Flask, render_template, request, flash, redirect, session, g
 from sqlalchemy.exc import IntegrityError
 
 from forms import RegisterForm, LoginForm, AddPlantForm, EditPlantForm, TutorialForm, GardenForm, EditUserInformation
 from models import db, connect_db, User, Plants, Weather, Garden
-from api_logic import get_weather, search_plants
+from api_logic import get_weather, search_plants, search_images
 
 LOGGED_IN_USER = ""
 WEATHER_API_KEY_REMOVE_ME = '8b2d74694d9e4fa0a8f1e9f7bc8f3a35'
 PLANT_API_KEY_REMOVE_ME = '7c-JHovj1mUW2xTvrfm30aMUZ1W0T9GM0p0wncztwRA'
-
+API_FLICKR_REMOVE_ME = '37f270bf535ec9124016031c7d180ee0'
 
 app = Flask(__name__)
 
@@ -235,7 +236,7 @@ def edit_account(user_id):
 def general_weather():
     """Shows current forecast"""
     weather = get_weather(WEATHER_API_KEY_REMOVE_ME)
-    print(weather)
+
     return render_template('/weather/general_weather.html', weather=weather.json())
 
 ###########################################################################
@@ -246,15 +247,29 @@ def search_for_plants(user_id):
     return render_template('/plants/search.html')
 
 @app.route('/api/plants/search', methods=['GET'])
-def return_searched_plants(plant):
+def return_searched_plants():
     """Calls python to make serve request, avoiding COORS NIGHTMARES"""
-    plant = request.json
+    plant = request.args.get('q')
     
     list_of_plants = search_plants(plant, PLANT_API_KEY_REMOVE_ME)
 
-    print(list_of_plants)
+    return list_of_plants.json()
 
-    return list_of_plants
+
+@app.route('/api/plants/images', methods=['GET'])
+def return_image_from_bing():
+    """Get images from flickr"""
+    query = request.args.get('q')
+
+    image_chosen = search_images(query, API_FLICKR_REMOVE_ME)
+
+    return image_chosen.json()
+
+@app.route('/api/plants/add')
+def add_plant_to_user():
+    """Add plant to user account"""
+
+    return
 ###########################################################################
 ###########################################################################
 ########################DELETE ME AFTER HEROKU DEPLOYMENT##################

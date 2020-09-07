@@ -3,22 +3,17 @@
 
 {% block content %}
 <nav class="navbar navbar-info bg-info">
-    <form id='searchPlant' class="form-inline" method='/api/plants/search'>
-      <input class="form-control mr-sm-2" id='searchQuery' type="text" placeholder="Search">
+    <form id='searchPlant' class="form-inline" action='/api/plants/search' method='GET'>
+      <input class="form-control mr-sm-2" id='searchQuery' name='searchQuery' type="text" placeholder="Search">
       <button class="btn btn-success my-2 my-sm-0" type="submit">Search</button>
     </form>
 </nav>
 
-<div id='plant-search-output' class='card-deck container-fluid'>
-    <!--Delete this code after getting it down for javascript function returns-->
-    <div class='card'>
-        <div class='card-title'>
-            <h3>Test Title</h3>
-            <div class='card-content'>
-                <h4>Content Test</h4>
-            </div>
-        </div>
+<div class='card-deck container-fluid'>
+    <div id='plant-search-output'>
+
     </div>
+    <!--Delete this code after getting it down for javascript function returns-->
 </div>
 
 
