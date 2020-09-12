@@ -1,12 +1,13 @@
 import os
 import pdb
 
-from flask import Flask, render_template, request, flash, redirect, session, g
+from flask import Flask, render_template, request, flash, redirect, session, g,jsonify
 from sqlalchemy.exc import IntegrityError
 
 from forms import RegisterForm, LoginForm, AddPlantForm, EditPlantForm, TutorialForm, GardenForm, EditUserInformation
-from models import db, connect_db, User, Plants, Weather, Garden
+from models import db, connect_db, User, Plants, Weather, Garden, DescribeGarden
 from api_logic import get_weather, search_plants, search_images
+from reminders import get_reminders
 
 LOGGED_IN_USER = ""
 WEATHER_API_KEY_REMOVE_ME = '8b2d74694d9e4fa0a8f1e9f7bc8f3a35'
@@ -22,7 +23,7 @@ app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', "123456789")
 
 connect_db(app)
-
+######################################################
 # Handling user instantiation into G object
 @app.before_request
 def add_user_to_g():
@@ -49,8 +50,6 @@ def do_logout():
         g.user = None
 
 ######################################################
-
-
 #Routes for user methodology
 @app.route('/', methods=['GET','POST'])
 def landing_page():
@@ -58,7 +57,14 @@ def landing_page():
        If stored in local g object, we show them a tutorial form so we can set up user account better
        Once user is set up, they can begin doing plant stuff
     """
+
+    if not g.user:
+        return render_template('index.html')
+
+    which_user = User.query.get_or_404(g.user.id)
     form = TutorialForm()
+    weather = get_weather(WEATHER_API_KEY_REMOVE_ME, g.user.location, False)
+    reminders = get_reminders(which_user)
 
     if form.validate_on_submit():
         which_user = User.query.get_or_404(g.user.id)
@@ -74,7 +80,7 @@ def landing_page():
         db.session.commit()
         return redirect('/')
 
-    return render_template('index.html', form=form)
+    return render_template('index.html', form=form, weather=weather.json(), reminders=reminders)
 
 @app.route('/register', methods=['GET','POST'])
 def register():
@@ -149,7 +155,7 @@ def add_plants(user_id):
     """Adds a plant to this user's account"""
     if not g.user:
         flash('Access unauthorized', 'danger')
-        return redirect("/")
+        return redirect('/')
     
     which_user = User.query.get_or_404(user_id)
     form = AddPlantForm()
@@ -178,6 +184,10 @@ def add_plants(user_id):
 @app.route('/<int:user_id>/plants/edit/<int:plant_id>', methods=['GET','POST'])
 def edit_plants(user_id, plant_id):
     """Lets user update information on current plants attached to their account"""
+    if not g.user:
+        flash('Access unauthorized', 'danger')
+        return redirect('/')
+
     which_user = User.query.get_or_404(user_id)
 
     form = EditPlantForm()
@@ -199,10 +209,14 @@ def edit_plants(user_id, plant_id):
     return render_template('/plants/edit_plants.html', form=form)
 
 ###########################################################################
-#USER ACCOUNT EDIT INFORMATION
+#Routes for user information
 @app.route('/<int:user_id>/account')
 def view_account(user_id):
     """View user account"""
+    if not g.user:
+        flash('Access unauthorized', 'danger')
+        return redirect('/')
+
     which_user = User.query.get_or_404(user_id)
     list_of_plants = which_user.plants
 
@@ -211,6 +225,10 @@ def view_account(user_id):
 @app.route('/<int:user_id>/account/edit')
 def edit_account(user_id):
     """Edit user information"""
+    if not g.user:
+        flash('Access unauthorized', 'danger')
+        return redirect('/')
+
     which_user = User.query.get_or_404(user_id)
     form = EditUserInformation()
 
@@ -229,23 +247,44 @@ def edit_account(user_id):
 
     return render_template('/user/user_edit.html', form=form)
 
+@app.route('/<int:user_id>/account/delete')
+def delete_account(user_id):
+    """Delete user account"""
+    if not g.user:
+        flash('Access unauthorized', 'danger')
+        return redirect('/')
+
+    which_user = User.query.get_or_404(user_id)
+
+    db.session.delete(which_user)
+    db.session.commit
+    
+    flash('Account Deleted', 'success')
+    return redirect('/')
 
 ###########################################################################
 # Weather API reporting
 @app.route('/weather')
 def general_weather():
     """Shows current forecast"""
-    weather = get_weather(WEATHER_API_KEY_REMOVE_ME)
+    weather = get_weather(WEATHER_API_KEY_REMOVE_ME, g.user.location, True)
 
     return render_template('/weather/general_weather.html', weather=weather.json())
 
 ###########################################################################
+#Routes for plant search
 @app.route('/<int:user_id>/plants/search')
 def search_for_plants(user_id):
     """Search for plants and add them to your account"""
+    if not g.user:
+        flash('Access unauthorized', 'danger')
+        return redirect('/')
 
     return render_template('/plants/search.html')
 
+###########################################################################
+#Routes for a API endpoint for getting results from a search endpoint
+#Allows for adding plants to account, getting images,
 @app.route('/api/plants/search', methods=['GET'])
 def return_searched_plants():
     """Calls python to make serve request, avoiding COORS NIGHTMARES"""
@@ -265,11 +304,102 @@ def return_image_from_bing():
 
     return image_chosen.json()
 
-@app.route('/api/plants/add')
+@app.route('/api/plants/add', methods=['POST'])
 def add_plant_to_user():
     """Add plant to user account"""
+    query = request.json
 
-    return
+    new_plant = Plants(plant_name = query['hiddenData'], user_id = g.user.id)
+        
+    db.session.add(new_plant)
+    
+    try:
+        db.session.commit()
+        succesful = {'message': 'Added to account!'}
+        return jsonify(succesful)
+    except:
+        unsuccesful = {'message': 'Error while adding'}
+        return jsonify(unsuccesful) 
+    
+@app.route('/api/plants/delete/<int:plant_id>', methods=['DELETE'])
+def delete_plant(plant_id):
+    """Delete plant from user"""
+    which_plant = Plants.query.get_or_404(plant_id)
+    message = {'message': 'Plant Removed!'}
+
+    db.session.delete(which_plant)
+    db.session.commit()
+
+    return jsonify(message)
+
+
+###########################################################################
+#Garden Routes
+@app.route('/garden/add', methods=['GET', 'POST'])
+def add_garden():
+    """Add a garden to user account, a collection of plants"""
+    if not g.user:
+        flash('Access unauthorized', 'danger')
+        return redirect('/')
+
+    form = GardenForm()
+    
+    if form.validate_on_submit():
+        new_garden = DescribeGarden(name=form.garden_name.data, description=form.description.data)
+
+        db.session.add(new_garden)
+        db.session.commit()
+        
+        flash('Added a new garden!', 'success')
+        return redirect('/')
+
+    return render_template('add_garden.html', form=form)
+
+@app.route('/garden/<int:garden_id>')
+def show_garden(garden_id):
+    """Show current garden"""
+    which_garden = DescribeGarden.query.get_or_404(garden_id)
+
+    return render_template('garden.html', garden=which_garden)
+
+@app.route('/garden/<int:garden_id>/edit', methods=['GET','POST'])
+def edit_garden(garden_id):
+    """Edit garden name and description"""
+    if not g.user:
+        flash('Access unauthorized', 'danger')
+        return redirect('/')
+
+    form = GardenForm()
+
+    if form.validate_on_submit():
+        which_garden = DescribeGarden.query.get_or_404(garden_id)
+
+        which_garden.name = form.garden_name.data
+        which_garden.description = form.description.data
+
+        db.session.add(which_garden)
+        db.session.commit()
+
+        flash(f'Edited garden: {which_garden.name}', 'success')
+        return redirect('/')
+    
+    return render_template('edit_garden.html', form=form)
+
+@app.route('/garden/<int:garden_id>/delete', methods=['GET', 'POST'])
+def delete_garden(garden_id):
+    """Delete garden user has"""
+    if not g.user:
+        flash('Access unauthorized', 'danger')
+        return redirect('/')
+
+    which_garden = DescribeGarden.query.get_or_404(garden_id)
+
+    db.session.delete(which_garden)
+    db.session.commit()
+   
+    flash('Garden deleted', 'success')
+    return redirect('/')
+
 ###########################################################################
 ###########################################################################
 ########################DELETE ME AFTER HEROKU DEPLOYMENT##################
@@ -283,3 +413,4 @@ def add_header(req):
     req.headers["Expires"] = "0"
     req.headers['Cache-Control'] = 'public, max-age=0'
     return req
+

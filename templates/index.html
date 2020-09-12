@@ -35,7 +35,7 @@
         {% if g.user.fully_set_up == True %}
             {% extends '/user/dashboard.html' %}
                 {% block body %}
-                    <div class='card-deck'>
+                    <div class='card-deck container-fluid'>
                         {{ super() }}
                     </div>
                 {% endblock %}

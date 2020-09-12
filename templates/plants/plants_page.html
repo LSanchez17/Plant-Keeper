@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
 
 {% block content %}
-
+    <div class='card-deck container-fluid'>
+        <div class='col-md-6'>
     {% if plants is defined and plants[0] is defined %}
-        <div class='card-deck col-md-12 container-fluid'>
         {% for plant in plants %}
-            <div class='card'>
+            <div class='card container-fluid' id='plant{{plant.id}}'>
                 <div class='card-body'>
                   <h4 class='card-title'>{{plant.plant_name}}</h4>
                   <ul class='list-group'>
@@ -13,13 +13,20 @@
                     <li class='list-group-item'>Last trimmed: {{plant.last_trimmed}}</li>
                     <li class='list-group-item'>Last repotted: {{plant.last_repotted}}</li>
                   </ul>
-                  <button class='btn btn-sm btn-primary'>
+                  <br/>
+                  <button class='btn btn-sm btn-success'>
                       <a href='/{{g.user.id}}/plants/edit/{{plant.id}}' class='card-link text-white'>Edit Plant</a>
                   </button>
+                  <form action='/api/plant/delete/{{plants.id}}' id='deletePlant'>
+                      <input type='hidden' name='plantId' value='plants.id'>
+                      <button class='btn btn-sm btn-danger' type='submit'>Delete Plant
+                      </button>
+                  </form>
                 </div>
             </div>
         {% endfor %}
         </div>
+    </div>
 
         <hr> 
         <div class='container-fluid'>
@@ -33,5 +40,5 @@
             <button class='btn btn-md btn-info'><a href='/{{g.user.id}}/plants/add' class='text-white'>Add plants</a></button>
         </div>
     {% endif %}
-
+    <script src='/static/scripts/plantMisc.js'></script>
 {% endblock %}

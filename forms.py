@@ -57,3 +57,4 @@ class TutorialForm(FlaskForm):
 class GardenForm(FlaskForm):
     """For for editing garden"""
     garden_name = StringField('Garden name:', validators=[DataRequired()])
+    description = StringField('Garden description:', validators=[DataRequired()])

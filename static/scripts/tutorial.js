@@ -1,6 +1,4 @@
 window.addEventListener('load', (e) => {
-    console.log('hellow')
-
     let startTut = document.querySelector('#tutorial');
     let tutorialForm = document.querySelector('#tutorial-user-form');
 
@@ -8,7 +6,7 @@ window.addEventListener('load', (e) => {
         startTut.classList += 'hidden';
         tutorialForm.classList.remove('hidden');
         
-        console.log('pass')
+        // console.log('pass')
     });
 
 })

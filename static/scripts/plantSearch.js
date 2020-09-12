@@ -65,23 +65,37 @@ const filterData = (largeObj, query) => {
 async function htmlOutput(plantName, image){
     let div = document.createElement('div');
     let innerDiv = document.createElement('div');
-    let innerInnerDiv = document.createElement('div');
     let title = document.createElement('h3');
     let img = document.createElement('img');
     let text = document.createElement('p');
     
-    //Move this to new function///////////////////////
+    //Button functionality to allow user to add this plant////
     let addToUserButton = document.createElement('button');
-    let addToUserLink = document.createElement('a');
+    let addToUserform = document.createElement('form');
+    let hiddenDataField = document.createElement('input');
     
     addToUserButton.classList += 'btn btn-md btn-success';
     addToUserButton.innerText = 'Add plant to account';
-    addToUserLink.href = '/api/plants/add';
-    addToUserLink.classList += 'card-link';
-    addToUserLink.setAttribute('style', 'text-black');
+    addToUserButton.type = 'submit';
+    addToUserform.method = 'POST';
+    addToUserform.action = '/api/plants/add';
+    addToUserform.classList += 'form-inline';
+    addToUserform.id = 'AddNewPlantAPI';
+    hiddenDataField.value = plantName;
+    hiddenDataField.type = 'hidden';
+    hiddenDataField.name = 'hiddenData';
     
-    addToUserButton.appendChild(addToUserLink);
-    /////////////////////////////////////////////////
+    addToUserform.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const formReference = e.target;
+        let response = await axios.post(formReference.action, {'hiddenData': hiddenDataField.value})
+        alert(response.data.message);
+    })
+
+    addToUserform.appendChild(hiddenDataField);
+    addToUserform.appendChild(addToUserButton);
+    /////////////////////////////////////////////////////////
 
     // console.log(plantName, query, image) Check to see if data is in!
     div.classList += 'card';
@@ -90,23 +104,32 @@ async function htmlOutput(plantName, image){
     title.classList += 'card-title';
     text.classList += 'card-text';
     title.innerText = plantName;
-    text.innerText = `Here is a picture of a different ${plantName}`;
+    text.innerText = `Here is a picture of a different ${plantName}, Results may vary(feature in beta)`;
 
     if(image == null || image == undefined){
-        image = await imageAPI(plantName);
-        // console.log(image)
-        text.innerText = 'Image result may not reflect an accurate representation, feature in beta';
+        //Call flickr API to get a result of images that match name, if none we catch the error and
+        //assign a default picture to the result
+        try{
+            image = await imageAPI(plantName);
+            // console.log(image)
+            text.innerText = 'Image result may not reflect an accurate representation, feature in beta';
 
-        let farmid = image.photos.photo[0].farm;
-        let serverid = image.photos.photo[0].server;
-        let secret = image.photos.photo[0].secret;
-        let id = image.photos.photo[0].id;
+            let farmid = image.photos.photo[0].farm;
+            let serverid = image.photos.photo[0].server;
+            let secret = image.photos.photo[0].secret;
+            let id = image.photos.photo[0].id;
 
-        let flickrURL = `https://farm${farmid}.staticflickr.com/${serverid}/${id}_${secret}.jpg`
+            let flickrURL = `https://farm${farmid}.staticflickr.com/${serverid}/${id}_${secret}.jpg`
 
-        img.src = flickrURL;
-        img.classList += 'card-img-bottom img-fluid';
-        img.setAttribute('style', 'height:300px; width: 300px;');
+            img.src = flickrURL;
+            img.classList += 'card-img-bottom img-fluid';
+            img.setAttribute('style', 'height:300px; width: 300px;');
+        }
+        catch(e){
+            img.src = '/static/mascot.png';
+            img.setAttribute('style', 'height:250px; width:250px;');
+            img.classList += 'card-img-bottom img-fluid';
+        }
     }
     else{
         img.src = image;
@@ -120,7 +143,7 @@ async function htmlOutput(plantName, image){
     innerDiv.appendChild(title);
     innerDiv.appendChild(text);
     innerDiv.appendChild(img);
-    innerDiv.appendChild(addToUserButton);
+    innerDiv.appendChild(addToUserform);
 
     // console.log(div); Final check before submitting
 
@@ -186,6 +209,10 @@ let appendResults = document.querySelector('#plant-search-output');
 
 searchPlant.addEventListener('submit', async (e) => {
     e.preventDefault();
+
+    while (appendResults.firstChild) {
+        appendResults.removeChild(appendResults.firstChild);
+    }
 
     let query = document.querySelector('#searchQuery').value;
     let newSearch = new SearchPlantAPI();

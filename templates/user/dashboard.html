@@ -1,47 +1,75 @@
 <!--Gets attached to homepage later-->
 {% block body %}
 
-<div class='container text-center'>
+<div class='container-fluid text-center'>
     <h2 class='card-title text-dark'>Welcome {{g.user.username}}</h2>
 </div>
 
-  <div class="card-deck container-fluid">
+  <div class='card-deck container-fluid'>
+    <div class='container-fluid'>
     <!--We need to loop here over any user gardens to make sure display them all-->
-    <div class="card border-success">
+      <div class="card border-success container-fluid">
         <div class="card-body">
           <h4 class="card-title">GARDEN_NAME_HERE</h4>
           <p class="card-text">
           TOTAL NUMBER OF PLANTS IN IT
           </p>
           <button class='btn btn-sm btn-primary'>
-              <a href="/garden/edit" class="card-link text-white">Edit Garden</a>
+              <a href='/garden/edit' class='card-link text-white'>Edit Garden</a>
+          </button>
+          <button class='btn btn-sm btn-success'>
+              <a href='/garden/add' class='card-link text-white'>Add a Garden</a>
           </button>
         </div>
-    </div>
+      </div>
 
     <!--Here we have to get the current weather from API, use javascript-->
-    <div class="card border-secondary">
+    <div class="card border-secondary container-fluid">
         <div class="card-body">
           <h4 class="card-title">Current Forecast</h4>
-          <h6 class="card-subtitle mb-2 text-muted">DAY_OF_WEEK</h6>
+          <h6 class="card-subtitle mb-2 text-muted">{{weather.data[0].valid_date}}, {{weather.city_name}}</h6>
           <p class="card-text">
-            ENTER FORECAST HERE, QUICK NOTES
+            <ul class='card-deck container-fluid'>
+            {% for data in weather.data %}
+            <div class='card border-info'>
+              <div class='card-body'>
+                <li class='list-group-item'>Date: {{data.valid_date}}</li>
+                <li class='list-group-item'>High: {{data.high_temp}}<span class='text-info'>&#176</span>F</span></li>
+                <li class='list-group-item'>Low: {{data.low_temp}}<span class='text-info'>&#176</span>F</span></li>
+                <li class='list-group-item'>Forecast: {{data.weather.description}}</li>
+              </div>
+            </div>
+            {% endfor %}
+            </ul>
+            <!-- {{weather}} -->
           </p>
-          <button class='btn btn-sm btn-primary'>
-            <a href="/weather" class="card-link text-white">Forecast Details</a>
+          <button class='btn btn-sm btn-info'>
+            <a href="/weather" class="card-link text-white">Today's Forecast Details</a>
           </button>
      </div>
    </div>
 
    <!--Here we loop through any tasks that need to be done and add them as a list-->
-   <div class="card border-danger">
+   <div class="card border-danger container-fluid">
     <div class="card-body">
       <h4 class="card-title">Reminders</h4>
       <ul class='list'>
         <li>
         <h6 class="card-subtitle mb-2 text-muted">TASK</h6>
           <p class="card-text">
-            DESCRIPTION OF TASK TO DO
+            {% for p in reminders %}
+              <h3>{{p.plant_name}} Last watered{{p.last_watered}}</h3>
+            {% endfor %}
+          </p>
+          <p class='card-text'>
+            {% for p in reminders %}
+              <h3>{{p.plant_name}} Last trimmed{{p.last_trimmed}}</h3>
+            {% endfor %}
+          </p>
+          <p class='card-text'>
+            {% for p in reminders %}
+              <h3>{{p.plant_name}} Last repotted{{p.last_repotted}}</h3>
+            {% endfor %}
           </p>
         <button class='btn btn-sm btn-warning'>
           <a href="/clear_task" class="card-link text-white">Clear Task</a>
@@ -49,6 +77,7 @@
         </li>
       </ul>
     </div>
+   </div>
    </div>
   </div>
 {% endblock %}

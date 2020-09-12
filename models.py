@@ -24,7 +24,7 @@ class User(db.Model):
     password = db.Column(db.Text, nullable=False)
     fully_set_up = db.Column(db.Boolean, default=False)
 
-    plants = db.relationship('Plants', secondary='garden')
+    plants = db.relationship('Plants', backref='owner')
     weather = db.relationship('Weather', backref='owner')
 
     def __repr__(self):
@@ -69,12 +69,12 @@ class Plants(db.Model):
 
     user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'))
 
-    gardens = db.relationship('User', secondary='garden')
+    gardens = db.relationship('DescribeGarden', secondary='garden')
 
 
     def __repr__(self):
         """Quick plant info"""
-        return f'[Plant: #{self.id}, {self.plant_name}, {self.user}]'
+        return f'[Plant: #{self.id}, {self.plant_name}, {self.user_id}]'
 
 class Weather(db.Model):
     """Weather data model"""
@@ -91,6 +91,17 @@ class Weather(db.Model):
         """Quick weather check"""
         return f'[Weather: {self.location}: {self.date}-{self.forecast}]'
 
+class DescribeGarden(db.Model):
+    """A garden to be combined with plants for better data visualization"""
+
+    __tablename__ = 'garden_holder'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(30), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+
+    plants = db.relationship('Plants', secondary='garden')
+
 class Garden(db.Model):
     """
     Many plants can be long to many gardens, and user can have many 
@@ -101,10 +112,9 @@ class Garden(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     plant_id = db.Column(db.Integer, db.ForeignKey('plant.id', ondelete='CASCADE'))
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'))
-    name = db.Column(db.Text, nullable=False)
+    garden_id = db.Column(db.Integer, db.ForeignKey('garden_holder.id', ondelete='CASCADE'))
 
-    user = relationship(User, backref=backref('garden', cascade='all, delete-orphan'))
+    garden_desc = relationship(DescribeGarden, backref=backref('garden', cascade='all, delete-orphan'))
     plant = relationship(Plants, backref=backref('garden', cascade='all, delete-orphan'))
 
     def __repr__(self):

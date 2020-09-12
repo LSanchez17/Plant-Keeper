@@ -1,10 +1,18 @@
 import requests
 
-def get_weather(APIKey):
+def get_weather(APIKey, zip, short):
     """
     Makes a request to API weather, stores it to server database, and returns the query result
     """
-    weather = requests.get('https://api.weatherbit.io/v2.0/current', params={'city': 'Indianapolis', 'Key': APIKey})
+    if(short):
+        weather = requests.get('https://api.weatherbit.io/v2.0/current', params={'postal_code': zip, 'units': 'I', 'Key': APIKey})
+    else:
+        weather = requests.get('http://api.weatherbit.io/v2.0/forecast/daily', params={'postal_code': zip, 'days': 3, 'units': 'I', 'Key': APIKey})
+    return weather
+
+def weather_for_watering(APIKey, zip):
+    """Returns a small 3 day forecast for determining if we need to water a plant"""
+    weather = request.get('htt[://api.weather.io/v2.0/forecast/daily', params={'postal_code': zip, 'days': 3, 'units': 'I', 'Key':APIKey})
 
     return weather
 
