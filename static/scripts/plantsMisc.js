@@ -2,7 +2,7 @@ window.addEventListener('load', (e) => {
 
     let deleteForm = document.querySelector('#deletePlant');
 
-    deleteForm.addEventListener('click', async (e) => {
+    deleteForm.addEventListener('submit', async (e) => {
         e.preventDefault()
 
         let formValue = document.querySelector('#plantId').value;

@@ -10,7 +10,7 @@
     <!--We need to loop here over any user gardens to make sure display them all-->
       <div class="card border-success container-fluid">
         <div class="card-body">
-          <h4 class="card-title">GARDEN_NAME_HERE</h4>
+          <h4 class="card-title">{{garden}}</h4>
           <p class="card-text">
           TOTAL NUMBER OF PLANTS IN IT
           </p>
@@ -55,22 +55,12 @@
       <h4 class="card-title">Reminders</h4>
       <ul class='list'>
         <li>
-        <h6 class="card-subtitle mb-2 text-muted">TASK</h6>
-          <p class="card-text">
-            {% for p in reminders %}
-              <h3>{{p.plant_name}} Last watered{{p.last_watered}}</h3>
-            {% endfor %}
-          </p>
-          <p class='card-text'>
-            {% for p in reminders %}
-              <h3>{{p.plant_name}} Last trimmed{{p.last_trimmed}}</h3>
-            {% endfor %}
-          </p>
-          <p class='card-text'>
-            {% for p in reminders %}
-              <h3>{{p.plant_name}} Last repotted{{p.last_repotted}}</h3>
-            {% endfor %}
-          </p>
+        <h6 class="card-subtitle mb-2 text-muted">Tasks:</h6>
+              {{reminders}}
+          
+            
+              
+
         <button class='btn btn-sm btn-warning'>
           <a href="/clear_task" class="card-link text-white">Clear Task</a>
         </button>

@@ -24,8 +24,9 @@ class User(db.Model):
     password = db.Column(db.Text, nullable=False)
     fully_set_up = db.Column(db.Boolean, default=False)
 
-    plants = db.relationship('Plants', backref='owner')
-    weather = db.relationship('Weather', backref='owner')
+    plants = db.relationship('Plants', backref='plant')
+    weather = db.relationship('Weather', backref='weather')
+    garden = db.relationship('DescribeGarden', backref='garden_holder')
 
     def __repr__(self):
         """Tell on yourself"""
@@ -69,7 +70,7 @@ class Plants(db.Model):
 
     user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'))
 
-    gardens = db.relationship('DescribeGarden', secondary='garden')
+    gardens = relationship('DescribeGarden', secondary='garden')
 
 
     def __repr__(self):
@@ -99,8 +100,9 @@ class DescribeGarden(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(30), nullable=False)
     description = db.Column(db.Text, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'))
 
-    plants = db.relationship('Plants', secondary='garden')
+    plants = relationship('Plants', secondary='garden')
 
 class Garden(db.Model):
     """
@@ -114,7 +116,7 @@ class Garden(db.Model):
     plant_id = db.Column(db.Integer, db.ForeignKey('plant.id', ondelete='CASCADE'))
     garden_id = db.Column(db.Integer, db.ForeignKey('garden_holder.id', ondelete='CASCADE'))
 
-    garden_desc = relationship(DescribeGarden, backref=backref('garden', cascade='all, delete-orphan'))
+    garden_desc = relationship(DescribeGarden, backref=backref('garden'), cascade='all, delete-orphan')
     plant = relationship(Plants, backref=backref('garden', cascade='all, delete-orphan'))
 
     def __repr__(self):

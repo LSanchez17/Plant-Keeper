@@ -12,7 +12,7 @@ def get_weather(APIKey, zip, short):
 
 def weather_for_watering(APIKey, zip):
     """Returns a small 3 day forecast for determining if we need to water a plant"""
-    weather = request.get('htt[://api.weather.io/v2.0/forecast/daily', params={'postal_code': zip, 'days': 3, 'units': 'I', 'Key':APIKey})
+    weather = request.get('htt[://api.weather.io/v2.0/forecast/daily', params={'postal_code': zip, 'days': 1, 'units': 'I', 'Key':APIKey})
 
     return weather
 

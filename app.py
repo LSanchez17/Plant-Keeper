@@ -23,6 +23,8 @@ app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', "123456789")
 
 connect_db(app)
+db.create_all()
+
 ######################################################
 # Handling user instantiation into G object
 @app.before_request
@@ -65,6 +67,7 @@ def landing_page():
     form = TutorialForm()
     weather = get_weather(WEATHER_API_KEY_REMOVE_ME, g.user.location, False)
     reminders = get_reminders(which_user)
+    garden = DescribeGarden.query.filter(DescribeGarden.user_id == g.user.id)
 
     if form.validate_on_submit():
         which_user = User.query.get_or_404(g.user.id)
@@ -80,7 +83,7 @@ def landing_page():
         db.session.commit()
         return redirect('/')
 
-    return render_template('index.html', form=form, weather=weather.json(), reminders=reminders)
+    return render_template('index.html', form=form, weather=weather.json(), reminders=reminders, garden=garden)
 
 @app.route('/register', methods=['GET','POST'])
 def register():
@@ -195,15 +198,15 @@ def edit_plants(user_id, plant_id):
     if form.validate_on_submit():
         which_plant = Plants.query.get_or_404(plant_id)
 
-        which_plant.last_watered = form.last_watered.data
-        which_plant.last_trimmed = form.last_trimmed.data
-        which_plant.last_repotted = form.last_repotted.data
+        which_plant.last_watered = form.last_watered.data or which_plant.last_watered
+        which_plant.last_trimmed = form.last_trimmed.data or which_plant.last_trimmed
+        which_plant.last_repotted = form.last_repotted.data or which_plant.last_repotted
         which_plant.indoor = form.indoor.data or False
 
         db.session.add(which_plant)
         db.session.commit()
 
-        flash('Plant editted successfully!', 'Sucess')
+        flash('Plant editted successfully!', 'Success')
         return redirect(f'/{g.user.id}/plants')
     
     return render_template('/plants/edit_plants.html', form=form)
@@ -321,7 +324,7 @@ def add_plant_to_user():
         unsuccesful = {'message': 'Error while adding'}
         return jsonify(unsuccesful) 
     
-@app.route('/api/plants/delete/<int:plant_id>', methods=['DELETE'])
+@app.route('/api/plants/delete/<int:plant_id>', methods=['POST'])
 def delete_plant(plant_id):
     """Delete plant from user"""
     which_plant = Plants.query.get_or_404(plant_id)
@@ -353,7 +356,7 @@ def add_garden():
         flash('Added a new garden!', 'success')
         return redirect('/')
 
-    return render_template('add_garden.html', form=form)
+    return render_template('/garden/add_garden.html', form=form)
 
 @app.route('/garden/<int:garden_id>')
 def show_garden(garden_id):
