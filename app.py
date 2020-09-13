@@ -92,12 +92,17 @@ def tutorial():
 def hub_page(user_id):
     """Main user hub. Contains user information like their gardens, quick weather, and reminders"""
 
-    which_user = User.query.get_or_404(user_id)
-    weather = get_weather(WEATHER_API_KEY_REMOVE_ME, g.user.location, False) or ''
-    reminders = get_reminders(which_user) or ''
-    garden = DescribeGarden.query.get_or_404(which_user.id) or ''
+    try:
+        which_user = User.query.get_or_404(user_id)
+        weather = get_weather(WEATHER_API_KEY_REMOVE_ME, g.user.location, False)
+        reminders = get_reminders(which_user)
+        garden = which_user.garden
 
-    return render_template('hub.html', weather=weather.json(), reminders=reminders, garden=garden)
+        data_list = [weather.json(), reminders, garden]
+
+        return render_template('hub.html', data=data_list)
+    except:
+        return render_template('hub.html', error='No Data Found :(')
 
 @app.route('/register', methods=['GET','POST'])
 def register():
@@ -241,8 +246,9 @@ def view_account(user_id):
 
     which_user = User.query.get_or_404(user_id)
     list_of_plants = which_user.plants
+    garden_number = which_user.garden
 
-    return render_template('/user/user_view.html', user=which_user, plant_list=list_of_plants)
+    return render_template('/user/user_view.html', user=which_user, plant_list=list_of_plants, gardens=garden_number)
 
 @app.route('/<int:user_id>/account/edit')
 def edit_account(user_id):
@@ -269,7 +275,7 @@ def edit_account(user_id):
 
     return render_template('/user/user_edit.html', form=form)
 
-@app.route('/<int:user_id>/account/delete')
+@app.route('/<int:user_id>/account/delete', methods=['POST'])
 def delete_account(user_id):
     """Delete user account"""
     if not g.user:
@@ -368,7 +374,7 @@ def add_garden():
     form = GardenForm()
     
     if form.validate_on_submit():
-        new_garden = DescribeGarden(name=form.garden_name.data, description=form.description.data)
+        new_garden = DescribeGarden(name=form.garden_name.data, description=form.description.data, user_id=g.user.id)
 
         db.session.add(new_garden)
         db.session.commit()

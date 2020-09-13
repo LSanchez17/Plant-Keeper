@@ -2,13 +2,19 @@
 
 {% block content %}
 <div class='container-fluid'>
-    <h3 class='text-black'>Good day {{g.user.username}}</h3>
-    <h3>You currently have PLANT_TOTAL registered to your account</h3>
-    <h3>You currently have GARDEN_TOTAL registered to your account</h3>
-    <h3>You have X_NOTIFICATIONS awaiting you on your dashboard</h3>
-    <br />
+    <h3 class='text-black'>Hello, {{g.user.first_name}}:</h3>
+    <div class='container-fluid'>
+        <div class='card'>
+            <h3 class='card-title'>You currently have {{plant_list|length}} plants registered to your account</h3>
+            <h3 class='card-title'>You currently have {{gardens|length}} gardens registered to your account</h3>
+        </div>
+    </div>
+        <br />
     <button class='btn btn-sm btn-secondary'>
         <a href='/{{g.user.id}}/account/edit' class='text-white'>Edit Info</a>
     </button>
+    <form action='/{{g.user.id}}/account/delete' method='POST'>
+        <button class='btn btn-sm btn-danger' type='submit'>Delete Account</button>
+    </form>
 </div>
 {% endblock %}

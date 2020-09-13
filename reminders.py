@@ -11,6 +11,9 @@ def get_reminders(user):
 
     user_plants = Plants.query.filter(Plants.user_id == user.id)
 
+    if not user_plants:
+        return
+    
     plants_need_water = watering_needs(user_plants, todays_date, user.location)
     plants_need_repotted = repotting_needs(user_plants, todays_date)
     plants_need_trimmed = trimming_needs(user_plants, todays_date)
