@@ -1,7 +1,7 @@
 import os
 import pdb
 
-from flask import Flask, render_template, request, flash, redirect, session, g,jsonify
+from flask import Flask, render_template, request, flash, redirect, session, g, jsonify
 from sqlalchemy.exc import IntegrityError
 
 from forms import RegisterForm, LoginForm, AddPlantForm, EditPlantForm, TutorialForm, GardenForm, EditUserInformation
@@ -9,7 +9,7 @@ from models import db, connect_db, User, Plants, Weather, Garden, DescribeGarden
 from api_logic import get_weather, search_plants, search_images
 from reminders import get_reminders
 
-LOGGED_IN_USER = ""
+LOGGED_IN_USER = "logged_in_user"
 WEATHER_API_KEY_REMOVE_ME = '8b2d74694d9e4fa0a8f1e9f7bc8f3a35'
 PLANT_API_KEY_REMOVE_ME = '7c-JHovj1mUW2xTvrfm30aMUZ1W0T9GM0p0wncztwRA'
 API_FLICKR_REMOVE_ME = '37f270bf535ec9124016031c7d180ee0'
@@ -23,7 +23,6 @@ app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', "123456789")
 
 connect_db(app)
-db.create_all()
 
 ######################################################
 # Handling user instantiation into G object
@@ -32,7 +31,7 @@ def add_user_to_g():
     """If we're logged in, add curr user to g"""
 
     if LOGGED_IN_USER in session:
-        g.user = User.query.get(session[LOGGED_IN_USER])
+        g.user = User.query.get_or_404(session[LOGGED_IN_USER])
     else:
         g.user = None
 
@@ -53,41 +52,59 @@ def do_logout():
 
 ######################################################
 #Routes for user methodology
-@app.route('/', methods=['GET','POST'])
-def landing_page():
-    """Basic landing page, shows login/register on template if not stored in local G object
-       If stored in local g object, we show them a tutorial form so we can set up user account better
-       Once user is set up, they can begin doing plant stuff
-    """
+@app.route('/')
+def landing():
+    """Landing Page"""
 
-    if not g.user:
-        return render_template('index.html')
+    if g.user and g.user.fully_set_up:
+        return redirect(f'/hub/{g.user.id}')
+    elif g.user and g.user.fully_set_up == False:
+        return redirect('/tutorial')
+    else:
+        return render_template('landing.html')
 
-    which_user = User.query.get_or_404(g.user.id)
-    form = TutorialForm()
-    weather = get_weather(WEATHER_API_KEY_REMOVE_ME, g.user.location, False)
-    reminders = get_reminders(which_user)
-    garden = DescribeGarden.query.filter(DescribeGarden.user_id == g.user.id)
+@app.route('/tutorial', methods=['GET','POST'])
+def tutorial():
+    """Tutorial for setting up user correctly"""
 
-    if form.validate_on_submit():
-        which_user = User.query.get_or_404(g.user.id)
+    if g.user.fully_set_up:
+        return redirect(f'/hub/{g.user.id}')
+    else:
+        form = TutorialForm()
 
-        which_user.first_name = form.first_name.data
-        which_user.last_name = form.last_name.data
-        which_user.profile_pic_url = form.profile_pic_url.data
-        which_user.location = form.location.data
-        which_user.fully_set_up = True
+        if form.validate_on_submit():
+            which_user = User.query.get_or_404(g.user.id)
+
+            which_user.first_name = form.first_name.data
+            which_user.last_name = form.last_name.data
+            which_user.profile_pic_url = form.profile_pic_url.data
+            which_user.location = form.location.data
+            which_user.fully_set_up = True
         
+            db.session.add(which_user)
+            db.session.commit()
+            return redirect(f'/hub/{g.user.id}')
+        else:
+            return render_template('tutorial.html', form=form)
+    
 
-        db.session.add(which_user)
-        db.session.commit()
-        return redirect('/')
+@app.route('/hub/<int:user_id>')
+def hub_page(user_id):
+    """Main user hub. Contains user information like their gardens, quick weather, and reminders"""
 
-    return render_template('index.html', form=form, weather=weather.json(), reminders=reminders, garden=garden)
+    which_user = User.query.get_or_404(user_id)
+    weather = get_weather(WEATHER_API_KEY_REMOVE_ME, g.user.location, False) or ''
+    reminders = get_reminders(which_user) or ''
+    garden = DescribeGarden.query.get_or_404(which_user.id) or ''
+
+    return render_template('hub.html', weather=weather.json(), reminders=reminders, garden=garden)
 
 @app.route('/register', methods=['GET','POST'])
 def register():
     """Register a new user"""
+    if g.user:
+        return redirect(f'/hub/{g.user.id}')
+
     form = RegisterForm()
 	
     if form.validate_on_submit():
@@ -101,23 +118,24 @@ def register():
 
             db.session.commit()
 
-            session['user_id'] = new_user.username
-
         except IntegrityError:
             flash('Username already exists', 'danger')
-            
             return render_template('register.html', form=form)
-
+        
+        
+        session['user_id'] = new_user.username
         do_login(new_user)
 
-        return redirect('/')
-
-    else:
-        return render_template('register.html', form=form)
+        return redirect('/tutorial')
+    
+    return render_template('register.html', form=form)
 
 @app.route('/login', methods=['GET','POST'])
 def login():
     """Log into page and find user"""
+    if g.user:
+        return redirect(f'/hub/{g.user.id}')
+
     form = LoginForm()
 
     if form.validate_on_submit():
@@ -126,7 +144,8 @@ def login():
         if which_user:
             do_login(which_user)
             flash(f'Login succesful!', 'success')
-            return redirect('/')
+
+            return redirect('/tutorial')
         else:
             flash(f'Invalid credentials','danger')
 
@@ -146,7 +165,7 @@ def plant_page(user_id):
     """Displays plants tied to this user"""
     if not g.user:
         flash('Access unauthorized', 'danger')
-        return redirect("/")
+        return redirect('/')
 
     which_user = User.query.get_or_404(user_id)
     which_plants = Plants.query.filter(Plants.user_id == which_user.id)
@@ -170,7 +189,7 @@ def add_plants(user_id):
                     last_watered = form.last_watered.data or form.last_watered.default,
                     last_trimmed = form.last_trimmed.data or form.last_trimmed.default,
                     last_repotted = form.last_repotted.data or form.last_repotted.default,
-                    indoor = form.indoor.data,
+                    indoor = form.indoor.data or False,
                     user_id = which_user.id
                     )
         
@@ -262,6 +281,7 @@ def delete_account(user_id):
     db.session.delete(which_user)
     db.session.commit
     
+    do_logout()
     flash('Account Deleted', 'success')
     return redirect('/')
 
@@ -354,7 +374,7 @@ def add_garden():
         db.session.commit()
         
         flash('Added a new garden!', 'success')
-        return redirect('/')
+        return redirect(f'/hub/{g.user.id}')
 
     return render_template('/garden/add_garden.html', form=form)
 
@@ -384,7 +404,7 @@ def edit_garden(garden_id):
         db.session.commit()
 
         flash(f'Edited garden: {which_garden.name}', 'success')
-        return redirect('/')
+        return redirect(f'/hub/{g.user.id}')
     
     return render_template('edit_garden.html', form=form)
 
@@ -401,7 +421,7 @@ def delete_garden(garden_id):
     db.session.commit()
    
     flash('Garden deleted', 'success')
-    return redirect('/')
+    return redirect(f'/hub/{g.user.id}')
 
 ###########################################################################
 ###########################################################################

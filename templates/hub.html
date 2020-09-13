@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">    <title>Plant-Keeper</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">    
     <link rel='stylesheet' href='/static/styles/body.css'>
+    <title>Plant-Keeper</title>
     {% if g.user %}
     <nav class='navbar navbar-dark bg-dark'>
         <ul class='nav justify-content-left'>
@@ -26,42 +27,12 @@
         {% endfor %}
     </div>
 
-
-    {% if g.user %}
-        {% if g.user.fully_set_up  == False %}
-            {% extends 'tutorial.html' %}
-        {% endif %}
-
-        {% if g.user.fully_set_up == True %}
-            {% extends '/user/dashboard.html' %}
-                {% block body %}
-                    <div class='card-deck container-fluid'>
-                        {{ super() }}
-                    </div>
-                {% endblock %}
-        {% endif %}
-
-    {% else %}
-        <div class='container-fluid'>
-        <img class='img-fluid' 
-            style='width: 10%;'
-            src='/static/mascot.png'>
-        <span class='bg-light text-dark'>Welcome to Plant Keeper!</span>
-        </div>
-
-        <div class='container-fluid'>
-      <div class='row'>
-        <div class='col-md-12 text-center'>
-        <button class='btn btn-thirtiary'>
-            <a href='/register'>Register</a>
-        </button>
-        <button class='btn btn-thirtiary'>
-            <a href='/login'>Login</a>
-        </button>
-        </div>
-      </div>
-        </div>
-
+    {% extends '/user/dashboard.html' %}
+        {% block body %}
+            <div class='card-deck container-fluid'>
+                {{ super() }}
+            </div>
+        {% endblock %}
     {% endif %}
 </body>
 </html>

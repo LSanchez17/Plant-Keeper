@@ -35,7 +35,7 @@ class AddPlantForm(FlaskForm):
     last_watered = DateField('Last date watered(Y:M:D)', default=date.today(), validators=[Optional()])
     last_trimmed = DateField('Last date trimmed(Y:M:D)', default=date.today(), validators=[Optional()])
     last_repotted = DateField('Last date repotted(Y:M:D)', default=date.today(), validators=[Optional()])
-    indoor = BooleanField('Indoor plant?', validators=[DataRequired()])
+    indoor = BooleanField('Indoor plant?', validators=[Optional()])
 
 
 class EditPlantForm(FlaskForm):
@@ -51,7 +51,7 @@ class TutorialForm(FlaskForm):
     """Tutorial form for inserting basic user information"""
     first_name = StringField('First name:', validators=[DataRequired()])
     last_name = StringField('Last name:', validators=[DataRequired()])
-    profile_pic_url = StringField('Profile picture URL', validators=[DataRequired()])
+    profile_pic_url = StringField('Profile picture URL', validators=[Optional()])
     location = IntegerField('Zip Code', validators=[DataRequired()])
 
 class GardenForm(FlaskForm):

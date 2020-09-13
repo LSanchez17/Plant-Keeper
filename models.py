@@ -113,10 +113,10 @@ class Garden(db.Model):
     __tablename__ = 'garden'
 
     id = db.Column(db.Integer, primary_key=True)
-    plant_id = db.Column(db.Integer, db.ForeignKey('plant.id', ondelete='CASCADE'))
-    garden_id = db.Column(db.Integer, db.ForeignKey('garden_holder.id', ondelete='CASCADE'))
+    plant_id = db.Column(db.Integer, db.ForeignKey('plant.id'))
+    garden_id = db.Column(db.Integer, db.ForeignKey('garden_holder.id'))
 
-    garden_desc = relationship(DescribeGarden, backref=backref('garden'), cascade='all, delete-orphan')
+    garden_desc = relationship(DescribeGarden, backref=backref('garden', cascade='all, delete-orphan'))
     plant = relationship(Plants, backref=backref('garden', cascade='all, delete-orphan'))
 
     def __repr__(self):

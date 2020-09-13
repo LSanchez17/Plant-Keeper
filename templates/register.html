@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class='row justify-content-center'>
+<div class='row justify-content-center container-fluid'>
   <div class='col-md-3'>
     <form id='register-user-form' class='form-group' method='POST'>
         {{form.hidden_tag() }}
@@ -15,9 +15,10 @@
             {% endfor %}
             </div>
             {% endfor %}
-            <button class='btn btn-md btn-success' type='submit'>Register</button>
-            <button class='btn btn-md btn-warning'><a href='/'>Return</a></button>
+            <button class='btn btn-md btn-success' type='submit'>Register</button>          
     </form>
+    <button class='btn btn-md btn-warning'><a href='/'>Return</a></button>
+    <button class='btn btn-md btn-info'><a href='/login' class='text-white'>Login</a></button>
   </div>
 </div>
 {% endblock %}

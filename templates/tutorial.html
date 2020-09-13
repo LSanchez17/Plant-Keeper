@@ -1,22 +1,27 @@
-
+{% extends 'base.html' %}
+{% block content %}
 <h2 class='text'>
     <button id='tutorial'>Welcome to the Plant-Keeper, please answer a couple of questions to get started...</button>
 </h2>
-
-<form id='tutorial-user-form' class='form-control hidden' method='POST'>
-    {{form.hidden_tag() }}
-        {% for field in form 
-            if field.widget.input_type != 'hidden' %}
-        <div>
-        <h2>{{field.label}}</h2>
-        <p>{{field}}</p>
-        {% for error in field.errors %}
-            {{error}}
-        {% endfor %}
-        </div>
-        {% endfor %}
-        <button type='submit'>Register</button>
-</form>
+<div class='row justify-content-center'>
+  <div class='cold-md-3'>
+    <form id='tutorial-user-form' class='form-group hidden' method='POST'>
+        {{form.hidden_tag() }}
+            {% for field in form 
+                if field.widget.input_type != 'hidden' %}
+            <div>
+            <h2>{{field.label}}</h2>
+            <p>{{field}}</p>
+            {% for error in field.errors %}
+                {{error}}
+            {% endfor %}
+            </div>
+            {% endfor %}
+            <button type='submit'>Finish Set up</button>
+    </form>
+  </div>
+</div>
 <br />
 
 <script src='/static/scripts/tutorial.js'></script>
+{% endblock %}

@@ -8,11 +8,13 @@
   <div class='card-deck container-fluid'>
     <div class='container-fluid'>
     <!--We need to loop here over any user gardens to make sure display them all-->
+    {% if garden|length == 0 %}
       <div class="card border-success container-fluid">
         <div class="card-body">
-          <h4 class="card-title">{{garden}}</h4>
+          <h4 class="card-title">{{garden.name}}</h4>
+          <h6 class='card-title'>{{garden.description}}</h6>
           <p class="card-text">
-          TOTAL NUMBER OF PLANTS IN IT
+            {{garden.plants|length}} Plants in this garden
           </p>
           <button class='btn btn-sm btn-primary'>
               <a href='/garden/edit' class='card-link text-white'>Edit Garden</a>
@@ -22,8 +24,9 @@
           </button>
         </div>
       </div>
-
+    {% endif %}
     <!--Here we have to get the current weather from API, use javascript-->
+    {% if weather|length == 0 %}
     <div class="card border-secondary container-fluid">
         <div class="card-body">
           <h4 class="card-title">Current Forecast</h4>
@@ -46,28 +49,44 @@
           <button class='btn btn-sm btn-info'>
             <a href="/weather" class="card-link text-white">Today's Forecast Details</a>
           </button>
-     </div>
-   </div>
+         </div>
+    </div>
+    {% endif %}
 
    <!--Here we loop through any tasks that need to be done and add them as a list-->
-   <div class="card border-danger container-fluid">
-    <div class="card-body">
-      <h4 class="card-title">Reminders</h4>
-      <ul class='list'>
-        <li>
-        <h6 class="card-subtitle mb-2 text-muted">Tasks:</h6>
+   {% if reminders|length == 0 %}
+    <div class="card border-danger container-fluid">
+      <div class="card-body">
+        <h4 class="card-title">Reminders</h4>
+        <ul class='list'>
+          <li>
+            <h6 class="card-subtitle mb-2 text-muted">Tasks:</h6>
               {{reminders}}
-          
-            
-              
-
-        <button class='btn btn-sm btn-warning'>
-          <a href="/clear_task" class="card-link text-white">Clear Task</a>
-        </button>
-        </li>
-      </ul>
+              <p class="card-text">
+                {% for item in reminders[0] %}
+                  {% for plant in item[item] %}
+                  <h3>{{plant.plant_name}} Last watered{{plant.last_watered}}</h3>
+                  {% endfor %}
+                {% endfor %}
+              </p>
+              <p class='card-text'>
+                {% for items in reminders[1] %}
+                  <h3>{{items.plant_name}} Last trimmed{{items.last_trimmed}}</h3>
+                {% endfor %}
+              </p>
+              <p class='card-text'>
+                {% for items in reminders[2] %}
+                  <h3>{{items.plant_name}} Last repotted{{items.last_repotted}}</h3>
+                {% endfor %}
+              </p>
+              <button class='btn btn-sm btn-warning'>
+                <a href="/clear_task" class="card-link text-white">Clear Task</a>
+              </button>
+          </li>
+        </ul>
+      </div>
     </div>
    </div>
-   </div>
+   {% endif %}
   </div>
 {% endblock %}

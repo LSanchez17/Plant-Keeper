@@ -6,8 +6,9 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">    
     <link rel='stylesheet' href='/static/styles/body.css'>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.20.0/axios.min.js" integrity="sha512-quHCp3WbBNkwLfYUMd+KwBAgpVukJu5MncuQaWXgCrfgcxCJAq/fo+oqrRKOj+UKEmyMCG3tb8RB63W+EmrOBg==" crossorigin="anonymous"></script>
+    <script src='/static/scripts/plantsMisc.js'></script>
     <title>Plant-Keeper</title>
-    {% if g.user %}
+    {% if g.user and g.user.fully_set_up %}
     <nav class='navbar navbar-dark bg-dark'>
         <ul class='nav justify-content-center'>
             <li class='navbar-brand'><a href='/' class='nav-link text-white'><img src='/static/logo.png' style='width:30px;height:30px'> Home</a></li>

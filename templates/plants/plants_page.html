@@ -33,10 +33,9 @@
                   <button class='btn btn-sm btn-success'>
                       <a href='/{{g.user.id}}/plants/edit/{{plant.id}}' class='card-link text-white'>Edit Plant</a>
                   </button>
-                  <form action='/api/plants/delete/{{plant.id}}' id='deletePlant' method='POST'>
-                      <input type='hidden' name='plantId' value='plants.id'>
-                      <button class='btn btn-sm btn-danger' type='submit'>Delete Plant
-                      </button>
+                  <form action='/api/plants/delete/{{plant.id}}' id='deletePlant{{plant.id}}' method='POST'>
+                      <input type='hidden' name='plantId{{plant.id}}' value='{{plant.id}}'>
+                  <button class='btn btn-sm btn-danger' type='submit' onclick='whichValueSubmits({{plant.id}})'>Delete Plant</button>
                   </form>
                 </div>
             </div>
@@ -56,5 +55,4 @@
             <button class='btn btn-md btn-info'><a href='/{{g.user.id}}/plants/add' class='text-white'>Add plants</a></button>
         </div>
     {% endif %}
-    <script src='/static/scripts/plantsMisc.js'></script>
 {% endblock %}

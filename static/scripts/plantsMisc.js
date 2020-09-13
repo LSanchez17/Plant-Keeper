@@ -1,16 +1,15 @@
-window.addEventListener('load', (e) => {
+let FORMVALUE;
 
-    let deleteForm = document.querySelector('#deletePlant');
+const whichValueSubmits = (value) => {
+    FORMVALUE = value;
 
+    let deleteForm = document.querySelector(`#deletePlant${FORMVALUE}`);
     deleteForm.addEventListener('submit', async (e) => {
-        e.preventDefault()
+        e.preventDefault();
 
-        let formValue = document.querySelector('#plantId').value;
-        let parentNode = document.querySelector(`plant${formValue}`);
-        let response = await axios.delete(`/api/plants/delete/${formValue}`);
-        console.log(response.data);
-        
+        let parentNode = document.querySelector(`#plant${FORMVALUE}`);
+        let response = await axios.post(`/api/plants/delete/${FORMVALUE}`);
+        // alert(response.data);
         parentNode.remove();
     });
-
-})
+}
