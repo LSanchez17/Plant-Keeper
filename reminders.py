@@ -6,10 +6,10 @@ import pdb
 WEATHER_API_KEY_REMOVE_ME = '7c-JHovj1mUW2xTvrfm30aMUZ1W0T9GM0p0wncztwRA'
 
 def get_reminders(user):
-    """Compare plant data tied to a user and return it"""
+    """Gets a list of plants tied to the user account, in the format of [[ORM],[ORM],[ORM]]"""
     todays_date = date.today()
 
-    user_plants = Plants.query.filter(Plants.user_id == user.id)
+    user_plants = user.plants
 
     if not user_plants:
         return
@@ -29,13 +29,15 @@ def watering_needs(plants, date, user_zip):
     """Compares dates for watering needs"""
     need_water = []
 
+    # pdb.set_trace()
+
     for items in plants:
         if( abs(((trim_dates(items.last_watered) - trim_dates(date)))) > timedelta(days=4) and items.indoor == True):
             need_water.append(items)
         elif( abs(((trim_dates(items.last_watered) - trim_dates(date)))) > timedelta(days=1) and items.indoor == False):
             need_water.append(weather_comparison(items, weather_for_watering(WEATHER_API_KEY_REMOVE_ME, user_zip)))
         else:
-            return
+            need_water.append('No water')
     
     return need_water
 
@@ -64,9 +66,10 @@ def weather_comparison(plant, date, weather):
     """Compares data for simple watering needs for a list of plants, all plants here are outdoor"""
     weather_rain_codes = [200, 201, 202, 230, 231, 232, 300, 301, 302, 500, 501, 502, 521, 522]
 
-    pdb.set_trace()
-    if( abs(((trim_dates(plant.last_watered) - trim_dates(date)))) > timedelta(1) and (weather.data.code not in weather_rain_codes)):
+    if(weather.data.code not in weather_rain_codes):
         return plant    
+    else:
+        return 'No water'
 
 def trim_dates(date):
     """Trims dates from lists to facilitate date comparisons"""

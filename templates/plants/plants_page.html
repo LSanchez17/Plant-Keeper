@@ -11,32 +11,32 @@
                   <ul class='list-group'>
                     <li class='list-group-item'>Last watered: 
                         {% if plant.last_watered %}
-                            {{plant.last_watered.strftime('%Y-%m-%d')}}</li>
+                            {{plant.last_watered.strftime('%m-%d-%Y')}}</li>
                         {% else %}
                             N/A
                         {% endif %}
                     <li class='list-group-item'>Last trimmed: 
                         {% if plant.last_trimmed %}
-                            {{plant.last_trimmed.strftime('%Y-%m-%d')}}</li>
+                            {{plant.last_trimmed.strftime('%m-%d-%Y')}}</li>
                         {% else %}
                             N/A
                         {% endif %}
                     <li class='list-group-item'>Last repotted: 
                         {% if plant.last_repotted %}
-                            {{plant.last_repotted.strftime('%Y-%m-%d')}}</li>
+                            {{plant.last_repotted.strftime('%m-%d-%Y')}}</li>
                         {% else %}
                             N/A
                         {% endif %}
                     <li class='list-group-item'>Indoor: {{plant.indoor}}</li>
                   </ul>
                   <br/>
-                  <button class='btn btn-sm btn-success'>
+                    <button class='btn btn-sm btn-success'>
                       <a href='/{{g.user.id}}/plants/edit/{{plant.id}}' class='card-link text-white'>Edit Plant</a>
-                  </button>
-                  <form action='/api/plants/delete/{{plant.id}}' id='deletePlant{{plant.id}}' method='POST'>
+                    </button>
+                    <form action='/api/plants/delete/{{plant.id}}' id='deletePlant{{plant.id}}' method='POST'>
                       <input type='hidden' name='plantId{{plant.id}}' value='{{plant.id}}'>
-                  <button class='btn btn-sm btn-danger' type='submit' onclick='whichValueSubmits({{plant.id}})'>Delete Plant</button>
-                  </form>
+                    <button class='btn btn-sm btn-danger' type='submit' onclick='whichValueSubmits({{plant.id}})'>Delete Plant</button>
+                    </form>
                 </div>
             </div>
         {% endfor %}

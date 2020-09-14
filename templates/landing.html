@@ -8,6 +8,12 @@
     <title>Plant Keeper</title>
 </head>
 <body>
+    <div class='container'>
+        {% for category, message in get_flashed_messages(with_categories=True) %}
+          <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+
     <div class='container-fluid'>
         <img class='img-fluid' 
             style='width: 10%;'

@@ -10,18 +10,24 @@
     <!--We need to loop here over any user gardens to make sure display them all-->
   {% if data %}
    <!--Here we have to get the current weather from API, use javascript-->
-   <div class="card border-secondary container-fluid">
-    <div class="card-body">
-      <h4 class="card-title">Current Forecast</h4>
-      <h6 class="card-subtitle mb-2 text-muted">{{data[0].data[0].valid_date}}, {{data[0].city_name}}</h6>
-      <p class="card-text">
+   <div class='card border-secondary container-fluid'>
+    <div class='card-body'>
+      <h4 class='card-title'>Current Forecast</h4>
+      <h6 class='card-subtitle mb-2 text-muted'>{{data[0].data[0].valid_date}}, {{data[0].city_name}}</h6>
+      <p class='card-text'>
         <ul class='card-deck container-fluid'>
         {% for data in data[0].data %}
         <div class='card border-info'>
           <div class='card-body'>
             <li class='list-group-item'>Date: {{data.valid_date}}</li>
             <li class='list-group-item'>High: {{data.high_temp}}<span class='text-info'>&#176</span>F</span></li>
-            <li class='list-group-item'>Low: {{data.low_temp}}<span class='text-info'>&#176</span>F</span></li>
+            <li class='list-group-item'>Low: {% if data.low_temp < 45 %}
+                                                 {{data.low_temp}}<span class='text-info'>&#176</span>F</span>
+                                                  <span class='text-danger'>Possible Frost, bring in delicate plants</span>
+                                              {% else %}
+                                                 {{data.low_temp}}<span class='text-info'>&#176</span>F</span>
+                                              {% endif %}
+            </li>
             <li class='list-group-item'>Forecast: {{data.weather.description}}</li>
           </div>
         </div>
@@ -29,22 +35,22 @@
         </ul>
       </p>
       <button class='btn btn-sm btn-info'>
-        <a href="/weather" class="card-link text-white">Today's Forecast Details</a>
+        <a href='/weather' class='card-link text-white'>Today's Forecast Details</a>
       </button>
      </div>
    </div>
 
    <div class='card border-success container-fluid'>
-    <div class="card-body">
+    <div class='card-body'>
       {% if data[2]|length > 0 %}
         {% for gardens in data[2] %}
-      <h4 class="card-title">{{gardens.name}}</h4>
+      <h4 class='card-title'><a href='/garden/{{gardens.id}}' class='text-info'>{{gardens.name}}</a></h4>
       <h6 class='card-title'>{{gardens.description}}</h6>
-      <p class="card-text">
-        {{gardens.garden.plants|length}} Plants in this garden
+      <p class='card-text'>
+        {{gardens.plants|length}} Plants in this garden
       </p>
       <button class='btn btn-sm btn-primary'>
-        <a href='/garden/edit' class='card-link text-white'>Edit Garden</a>
+        <a href='/garden/{{gardens.id}}/edit' class='card-link text-white'>Edit Garden</a>
       </button>
         {% endfor %}
       {% endif %}
@@ -55,16 +61,20 @@
    </div>
    
    <!--Here we loop through any tasks that need to be done and add them as a list-->
-   <div class="card border-danger container-fluid">
-    <div class="card-body">
-      <h4 class="card-title">Reminders</h4>
+   <div class='card border-danger container-fluid'>
+    <div class='card-body'>
+      <h4 class='card-title'>Reminders</h4>
       <ul class='list'>
         <li>
-          <h6 class="card-subtitle mb-2 text-muted">Tasks:</h6>
-            <p class="card-text">
+          <h6 class='card-subtitle mb-2 text-muted'>Tasks:</h6>
+            <p class='card-text'>
             {% if data[1][0]|length > 0 %}
               {% for items in data[1][0] %}
-                <h3 class='card-text'>{{items.plant_name}} Last watered{{items.last_watered}}</h3>
+                {% if items != 'No water' %}
+                <h3 class='card-text'><a href='/{{g.user.id}}/plants' class='text-info'>{{items.plant_name}}</a> 
+                  Needs watering! Last watered: <span class='text-danger'>{{items.last_watered.strftime('%m-%d-%Y')}}</span>
+                </h3>
+                {% endif %}
               {% endfor %}
             {% else %}
               <h3 class='card-text'>No watering needed!</h3>
@@ -73,7 +83,9 @@
             <p class='card-text'>
             {% if data[1][1]|length > 0 %}
               {% for items in data[1][1] %}
-                <h3>{{items.plant_name}} Last trimmed{{items.last_trimmed}}</h3>
+                <h3><a href='/{{g.user.id}}/plants' class='text-info'>{{items.plant_name}}</a> 
+                  Might need some pruning/trimming.  Last trimmed: <span class='text-danger'>{{items.last_trimmed.strftime('%m-%d-%Y')}}</span>
+                </h3>
               {% endfor %}
             {% else %}
               <h3 class='card-text'>No trimming needed!</h3>
@@ -82,7 +94,9 @@
             <p class='card-text'>
             {% if data[1][2]|length > 0 %}
               {% for items in data[1][2] %}
-                <h3>{{items.plant_name}} Last repotted{{items.last_repotted}}</h3>
+                <h3><a href='/{{g.user.id}}/plants' class='text-info'>{{items.plant_name}}</a> 
+                  Might need repotting. Last repotted: <span class='text-danger'>{{items.last_repotted.strftime('%m-%d-%Y')}}</span>
+                </h3>
               {% endfor %}
             {% else %}
               <h3 class='card-text'>No repotting needed!</h3>

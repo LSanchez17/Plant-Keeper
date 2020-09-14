@@ -37,7 +37,6 @@ class AddPlantForm(FlaskForm):
     last_repotted = DateField('Last date repotted(Y:M:D)', default=date.today(), validators=[Optional()])
     indoor = BooleanField('Indoor plant?', validators=[Optional()])
 
-
 class EditPlantForm(FlaskForm):
     """Login form."""
 
@@ -58,3 +57,13 @@ class GardenForm(FlaskForm):
     """For for editing garden"""
     garden_name = StringField('Garden name:', validators=[DataRequired()])
     description = StringField('Garden description:', validators=[DataRequired()])
+
+class EditGardenForm(FlaskForm):
+    """Edit garden name and description"""
+    garden_name = StringField('Garden name:', validators=[Optional()])
+    description = StringField('Garden description:', validators=[Optional()])
+
+class NewPlantForGarden(FlaskForm):
+    """Form for adding a platn to a specific garden."""
+
+    plant = SelectField('Pick a plant to add', coerce=int, validators=[DataRequired()])

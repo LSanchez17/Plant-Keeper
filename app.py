@@ -3,8 +3,9 @@ import pdb
 
 from flask import Flask, render_template, request, flash, redirect, session, g, jsonify
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import and_
 
-from forms import RegisterForm, LoginForm, AddPlantForm, EditPlantForm, TutorialForm, GardenForm, EditUserInformation
+from forms import RegisterForm, LoginForm, AddPlantForm, EditPlantForm, TutorialForm, GardenForm, EditUserInformation, NewPlantForGarden
 from models import db, connect_db, User, Plants, Weather, Garden, DescribeGarden
 from api_logic import get_weather, search_plants, search_images
 from reminders import get_reminders
@@ -282,13 +283,12 @@ def delete_account(user_id):
         flash('Access unauthorized', 'danger')
         return redirect('/')
 
-    which_user = User.query.get_or_404(user_id)
-
-    db.session.delete(which_user)
+    db.session.delete(g.user)
     db.session.commit
     
     do_logout()
     flash('Account Deleted', 'success')
+    
     return redirect('/')
 
 ###########################################################################
@@ -361,7 +361,6 @@ def delete_plant(plant_id):
 
     return jsonify(message)
 
-
 ###########################################################################
 #Garden Routes
 @app.route('/garden/add', methods=['GET', 'POST'])
@@ -384,12 +383,28 @@ def add_garden():
 
     return render_template('/garden/add_garden.html', form=form)
 
-@app.route('/garden/<int:garden_id>')
+@app.route('/garden/<int:garden_id>', methods=['GET','POST'])
 def show_garden(garden_id):
     """Show current garden"""
     which_garden = DescribeGarden.query.get_or_404(garden_id)
+    which_user = User.query.get_or_404(g.user.id)
+    which_plants = which_user.plants
+    form = NewPlantForGarden()
 
-    return render_template('garden.html', garden=which_garden)
+    already_in_garden = [plant.id for plant in which_garden.plants]
+    form.plant.choices = (db.session.query(Plants.id, Plants.plant_name).filter(Plants.id.notin_(already_in_garden)).all())
+
+    if form.validate_on_submit():
+        plant = form.plant.data
+        add_to_garden = Garden(plant_id=plant, garden_id=which_garden.id)
+
+        db.session.add(add_to_garden)
+        db.session.commit()
+
+        flash(f'Plant added to {which_garden.name} garden!', 'success')
+        return redirect(f'/hub/{g.user.id}')
+
+    return render_template('/garden/garden.html', garden=which_garden, plants=which_plants, form=form)
 
 @app.route('/garden/<int:garden_id>/edit', methods=['GET','POST'])
 def edit_garden(garden_id):
@@ -399,12 +414,13 @@ def edit_garden(garden_id):
         return redirect('/')
 
     form = GardenForm()
+    which_garden = DescribeGarden.query.get_or_404(garden_id)
 
     if form.validate_on_submit():
         which_garden = DescribeGarden.query.get_or_404(garden_id)
 
-        which_garden.name = form.garden_name.data
-        which_garden.description = form.description.data
+        which_garden.name = form.garden_name.data or which_garden.name
+        which_garden.description = form.description.data or which_garden.description
 
         db.session.add(which_garden)
         db.session.commit()
@@ -412,9 +428,9 @@ def edit_garden(garden_id):
         flash(f'Edited garden: {which_garden.name}', 'success')
         return redirect(f'/hub/{g.user.id}')
     
-    return render_template('edit_garden.html', form=form)
+    return render_template('/garden/edit_garden.html', form=form, garden=which_garden)
 
-@app.route('/garden/<int:garden_id>/delete', methods=['GET', 'POST'])
+@app.route('/garden/<int:garden_id>/delete', methods=['POST'])
 def delete_garden(garden_id):
     """Delete garden user has"""
     if not g.user:
@@ -427,6 +443,15 @@ def delete_garden(garden_id):
     db.session.commit()
    
     flash('Garden deleted', 'success')
+    return redirect(f'/hub/{g.user.id}')
+
+@app.route('/garden/delete/<int:plant_id>', methods=['POST'])
+def delete_plant_from_garden(plant_id):
+    """Delete plant from garden"""
+    which_plant = Plants.query.get_or_404(plant_id)
+
+
+    flash('Plant deleted from garden', 'success')
     return redirect(f'/hub/{g.user.id}')
 
 ###########################################################################

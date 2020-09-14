@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+    {% block content %}
+    <div class='card border-success container-fluid'>
+        <div class='card-body'>
+          <h4 class='card-title'>{{garden.name}}</h4>
+          <h6 class='card-title'>{{garden.description}}</h6>
+          <p class='card-text'>
+              <div class='card-deck'>
+            {% if garden.plants|length == 0 %}
+                {{garden.plants|length}} Plants in this garden
+            {% else %}
+                {% for plant in garden.plants %}
+                <div class='card container-fluid' id='plant{{plant.id}}'>
+                    <div class='card-body'>
+                      <h4 class='card-title'>{{plant.plant_name}}</h4>
+                        <button class='btn btn-sm btn-secondary'>
+                          <a href='/{{g.user.id}}/plants/edit/{{plant.id}}' class='card-link text-white'>Edit Plant</a>
+                        </button>
+                        <form action='/garden/delete/{{plant.id}}' id='deletePlant{{plant.id}}' method='POST'>
+                            <button class='btn btn-sm btn-danger' type='submit'>Delete Plant</button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            {% endif %}
+              </div>
+          </p>
+          <button class='btn btn-sm btn-primary'>
+            <a href='/garden/{{garden.id}}/edit' class='card-link text-white'>Edit Garden</a>
+          </button>
+        </div>
+    </div>
+
+      <div class='card border-success container-fluid'>
+        <form id='add-new-plant-form' method='POST'>
+            {{form.hidden_tag() }}
+                {% for field in form 
+                    if field.widget.input_type != 'hidden' %}
+                <div>
+                <h2>{{field.label}}</h2>
+                <p>{{field}}</p>
+                {% for error in field.errors %}
+                    {{error}}
+                {% endfor %}
+                </div>
+                {% endfor %}
+                <button class='btn btn-success' type='submit'>Add plant</button>
+        </form>
+      </div>
+    {% endblock %}

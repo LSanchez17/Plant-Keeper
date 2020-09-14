@@ -74,8 +74,8 @@ class Plants(db.Model):
 
 
     def __repr__(self):
-        """Quick plant info"""
-        return f'[Plant: #{self.id}, {self.plant_name}, {self.user_id}]'
+        """Quick plant info, tied to the user plants relationship"""
+        return f'[Plant: id#{self.id}, name:{self.plant_name}, ownerId:{self.user_id}, indoor:{self.indoor}]'
 
 class Weather(db.Model):
     """Weather data model"""
@@ -104,6 +104,10 @@ class DescribeGarden(db.Model):
 
     plants = relationship('Plants', secondary='garden')
 
+    def __repr__(self):
+        """Quick garden info, tied to the user plants relationship"""
+        return f'[Plant: id#{self.id}, name:{self.name}, desc:{self.description}, owner:{self.user_id}]'
+
 class Garden(db.Model):
     """
     Many plants can be long to many gardens, and user can have many 
@@ -121,7 +125,7 @@ class Garden(db.Model):
 
     def __repr__(self):
         """Garden info"""
-        return f'[Garden: {self.name}-{self.user}, {self.plant_id}]'
+        return f'[Garden: {self.id}, {self.plant}, {self.garden_desc}]'
 
 def connect_db(app):
     """Connect this database"""
