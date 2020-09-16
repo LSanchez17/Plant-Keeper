@@ -1,8 +1,8 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class='row justify-content-center'>
-    <div class='col-md-3'>
+<div class='row justify-content-center shadow-lg p-4 mb-3 bg-light rounded'>
+    <div class='col-md-3 shadow p-4 mb-3 bg-white rounded'>
       <form id='add-garden-form' class='form-group' method='POST'>
           {{form.hidden_tag() }}
               {% for field in form 
@@ -16,8 +16,9 @@
               </div>
               {% endfor %}
               <button class='btn btn-md btn-success' type='submit'>Add Garden</button>
-              <button class='btn btn-md btn-warning'><a href='/'>Return</a></button>
       </form>
+      <button class='btn btn-md btn-warning'><a href='/' class='text-white'>Return</a></button>
+
     </div>
   </div>
 {% endblock %}

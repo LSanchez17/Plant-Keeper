@@ -1,6 +1,7 @@
 let FORMVALUE;
 
 const whichValueSubmits = (value) => {
+    //This allows us to delete a plant from a user without redirecting
     FORMVALUE = value;
 
     let deleteForm = document.querySelector(`#deletePlant${FORMVALUE}`);

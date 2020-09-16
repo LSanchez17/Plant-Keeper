@@ -59,10 +59,13 @@ const filterData = (largeObj, query) => {
                 })    
         }
     }
+    // console.log(plantArray)
     return plantArray;
 }
 
 async function htmlOutput(plantName, image){
+    //Creates formatting for a new plant being returned to the user's front end
+    //Very lengthy, definitely a candidate for restructuring, its doing too much
     let div = document.createElement('div');
     let innerDiv = document.createElement('div');
     let title = document.createElement('h3');
@@ -152,7 +155,12 @@ async function htmlOutput(plantName, image){
 }
 
 async function formatOutput(dataArr, query){
-    let refinedData = '';
+    /*
+    *  This function calls the htmlOutput() function with a plant name, and plant image.  
+    *  It gets data from the initial API call and then checks it for non null values
+    */
+
+    let refinedData;
     let upperQuery = query.toUpperCase(); 
     let errorData = [];
 
@@ -190,13 +198,30 @@ async function formatOutput(dataArr, query){
         }
         catch(e){
             errorData.push(plantObj)
+            
             errorData.forEach(async key => {
-                if(key.hasOwnProperty('common_name') !== null){
+                console.log(key.slug)
+                if(key.common_name === null){
                     // console.log(`common name ${key.scientific_name}`)
+                    return await htmlOutput(key.family, key.image_url);
+                }
+                else if(key.family === null){
+                    return await htmlOutput(key.family_common_name, key.image_url);
+                }
+                else if(key.family_common_name === null ){
+                    return await htmlOutput(key.genus, key.image_url);
+                }
+                else if(key.genus == null){
                     return await htmlOutput(key.scientific_name, key.image_url);
                 }
+                else if(key.scientific_name === null){
+                    return await htmlOutput(key.slug, key.image_url);
+                }
+                else if(key.common_name === null){
+                    return await htmlOutput(key.slug, key.image_url)
+                }
                 else{
-                    console.log('fail')
+                    console.log(`${e}; Failed Search`)
                     return;
                 }
             })

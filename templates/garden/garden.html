@@ -1,24 +1,21 @@
 {% extends 'base.html' %}
     {% block content %}
-    <div class='card border-success container-fluid'>
-        <div class='card-body'>
+    <div class='card border-success container-fluid shadow-lg p-4 mb-3 bg-light rounded'>
+        <div class='card-body shadow p-4 mb-3 bg-white rounded'>
           <h4 class='card-title'>{{garden.name}}</h4>
           <h6 class='card-title'>{{garden.description}}</h6>
-          <p class='card-text'>
+          <p class='card-text justify-content-center'>
               <div class='card-deck'>
             {% if garden.plants|length == 0 %}
                 {{garden.plants|length}} Plants in this garden
             {% else %}
                 {% for plant in garden.plants %}
-                <div class='card container-fluid' id='plant{{plant.id}}'>
+                <div class='card container-fluid shadow-sm p-2 mb-2 bg-white rounded' id='plant{{plant.id}}'>
                     <div class='card-body'>
                       <h4 class='card-title'>{{plant.plant_name}}</h4>
                         <button class='btn btn-sm btn-secondary'>
                           <a href='/{{g.user.id}}/plants/edit/{{plant.id}}' class='card-link text-white'>Edit Plant</a>
                         </button>
-                        <form action='/garden/delete/{{plant.id}}' id='deletePlant{{plant.id}}' method='POST'>
-                            <button class='btn btn-sm btn-danger' type='submit'>Delete Plant</button>
-                        </form>
                     </div>
                 </div>
                 {% endfor %}
@@ -31,9 +28,10 @@
         </div>
     </div>
 
-      <div class='card border-success container-fluid'>
-        <form id='add-new-plant-form' method='POST'>
-            {{form.hidden_tag() }}
+      <div class='card container-fluid shadow-lg p-4 mb-3 bg-light rounded'>
+        <div class='shadow p-4 mb-3 bg-white rounded'>
+            <form id='add-new-plant-form' method='POST'>
+                {{form.hidden_tag() }}
                 {% for field in form 
                     if field.widget.input_type != 'hidden' %}
                 <div>
@@ -45,6 +43,7 @@
                 </div>
                 {% endfor %}
                 <button class='btn btn-success' type='submit'>Add plant</button>
-        </form>
+            </form>
+        </div>
       </div>
     {% endblock %}

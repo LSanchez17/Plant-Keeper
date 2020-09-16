@@ -1,16 +1,15 @@
 <!--Gets attached to homepage later-->
 {% block body %}
-
-<div class='container-fluid text-center'>
+<div class='container-fluid shadow p-4 mb-3 bg-light rounded col-11'>
+  <div class='container-fluid text-center'>
     <h2 class='card-title text-dark'>Welcome {{g.user.username}}</h2>
 </div>
-
   <div class='card-deck container-fluid'>
     <div class='container-fluid'>
     <!--We need to loop here over any user gardens to make sure display them all-->
   {% if data %}
    <!--Here we have to get the current weather from API, use javascript-->
-   <div class='card border-secondary container-fluid'>
+   <div class='card border-secondary container-fluid shadow p-4 mb-3 bg-light rounded'>
     <div class='card-body'>
       <h4 class='card-title'>Current Forecast</h4>
       <h6 class='card-subtitle mb-2 text-muted'>{{data[0].data[0].valid_date}}, {{data[0].city_name}}</h6>
@@ -40,7 +39,7 @@
      </div>
    </div>
 
-   <div class='card border-success container-fluid'>
+   <div class='card border-success container-fluid shadow p-4 mb-3 bg-light rounded'>
     <div class='card-body'>
       {% if data[2]|length > 0 %}
         {% for gardens in data[2] %}
@@ -61,23 +60,24 @@
    </div>
    
    <!--Here we loop through any tasks that need to be done and add them as a list-->
-   <div class='card border-danger container-fluid'>
+   <div class='card border-danger container-fluid shadow p-4 mb-3 bg-light rounded'>
     <div class='card-body'>
       <h4 class='card-title'>Reminders</h4>
       <ul class='list'>
         <li>
           <h6 class='card-subtitle mb-2 text-muted'>Tasks:</h6>
             <p class='card-text'>
+              {{data[1][0][0]}}
             {% if data[1][0]|length > 0 %}
               {% for items in data[1][0] %}
                 {% if items != 'No water' %}
                 <h3 class='card-text'><a href='/{{g.user.id}}/plants' class='text-info'>{{items.plant_name}}</a> 
                   Needs watering! Last watered: <span class='text-danger'>{{items.last_watered.strftime('%m-%d-%Y')}}</span>
                 </h3>
+                {% else %}
+                <h3 class='card-text'>No watering needed!</h3>
                 {% endif %}
               {% endfor %}
-            {% else %}
-              <h3 class='card-text'>No watering needed!</h3>
             {% endif %}
             </p>
             <p class='card-text'>
@@ -108,7 +108,10 @@
    </div>
       
   {% else %}
-  <h2>No data yet to create reminders {{error}}</h2>
+  <div class='container-fluid bg-white shadow p-2 mb-3 bg-light rounded'>
+      <h2 class='text-center'><a href='/{{g.user.id}}/plants' class='text-info'>{{error}}</a></h2>
+  </div>
   {% endif %}
   </div>
+</div>
 {% endblock %}

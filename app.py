@@ -103,7 +103,8 @@ def hub_page(user_id):
 
         return render_template('hub.html', data=data_list)
     except:
-        return render_template('hub.html', error='No Data Found :(')
+        message = 'Please add a plant to your account to start'
+        return render_template('hub.html', error=message)
 
 @app.route('/register', methods=['GET','POST'])
 def register():
@@ -392,7 +393,7 @@ def show_garden(garden_id):
     form = NewPlantForGarden()
 
     already_in_garden = [plant.id for plant in which_garden.plants]
-    form.plant.choices = (db.session.query(Plants.id, Plants.plant_name).filter(Plants.id.notin_(already_in_garden)).all())
+    form.plant.choices = (db.session.query(Plants.id, Plants.plant_name).filter(Plants.id.notin_(already_in_garden)).filter(Plants.user_id == which_user.id).all())
 
     if form.validate_on_submit():
         plant = form.plant.data
@@ -444,19 +445,6 @@ def delete_garden(garden_id):
    
     flash('Garden deleted', 'success')
     return redirect(f'/hub/{g.user.id}')
-
-@app.route('/garden/delete/<int:plant_id>', methods=['POST'])
-def delete_plant_from_garden(plant_id):
-    """Delete plant from garden"""
-    which_plant = Plants.query.get_or_404(plant_id)
-
-
-    flash('Plant deleted from garden', 'success')
-    return redirect(f'/hub/{g.user.id}')
-
-###########################################################################
-###########################################################################
-########################DELETE ME AFTER HEROKU DEPLOYMENT##################
 
 @app.after_request
 def add_header(req):

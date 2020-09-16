@@ -12,7 +12,7 @@ def get_reminders(user):
     user_plants = user.plants
 
     if not user_plants:
-        return
+        return 
     
     plants_need_water = watering_needs(user_plants, todays_date, user.location)
     plants_need_repotted = repotting_needs(user_plants, todays_date)

@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
     {% block content %}
-    <div class='row justify-content-center'>
-        <div class='col-md-3'>
+    <div class='container-fluid row justify-content-center shadow-lg p-4 mb-3 bg-light rounded'>
+        <div class='col-md-3 shadow p-4 mb-3 bg-white rounded'>
           <form id='edit-garden-form' class='form-group' method='POST'>
               {{form.hidden_tag() }}
                   {% for field in form 
@@ -16,11 +16,10 @@
                   {% endfor %}
                   <button class='btn btn-md btn-success' type='submit'>Update</button>
           </form>
-          <button class='btn btn-md btn-warning'><a href='/hub' class='text-white'>Return</a></button>
+          <button class='btn btn-md btn-warning'><a href='/hub/{{g.user.id}}' class='text-white'>Return</a></button>
         </div>
     </div>
-
-    <div class='container-fluid bg-dark'>
+    <div class='container-fluid shadow-lg p-4 mb-3 bg-light rounded'>
       <div class='row justify-content-center'>
         <div class='col-md-3'>
             <form action='/garden/{{garden.id}}/delete' method='POST'>

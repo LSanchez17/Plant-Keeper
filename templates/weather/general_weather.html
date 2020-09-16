@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <div class='container-fluid'>
+    <div class='container-fluid shadow-lg p-4 mb-3 bg-light rounded'>
         <h1 class='text-info'><img src='/static/weather/calendar.png' style='width:45px;height:45px'> Displaying your local weather:</h1>
         <ul class='list-group'>
             <li class='list-group-item'>City: <span class='text-info'>{{weather.data[0].city_name}}, {{weather.data[0].state_code}}</span></li>
