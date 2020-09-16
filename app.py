@@ -11,9 +11,9 @@ from api_logic import get_weather, search_plants, search_images
 from reminders import get_reminders
 
 LOGGED_IN_USER = "logged_in_user"
-WEATHER_API_KEY_REMOVE_ME = '8b2d74694d9e4fa0a8f1e9f7bc8f3a35'
-PLANT_API_KEY_REMOVE_ME = '7c-JHovj1mUW2xTvrfm30aMUZ1W0T9GM0p0wncztwRA'
-API_FLICKR_REMOVE_ME = '37f270bf535ec9124016031c7d180ee0'
+WEATHER_API_KEY_REMOVE_ME = process.env.WEATHER_API
+PLANT_API_KEY_REMOVE_ME = process.env.PLANT_API
+API_FLICKR_REMOVE_ME = process.env.FLICKR_API
 
 app = Flask(__name__)
 
