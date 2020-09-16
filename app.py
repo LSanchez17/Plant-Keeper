@@ -24,6 +24,7 @@ app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', "123456789")
 
 connect_db(app)
+db.create_all()
 
 ######################################################
 # Handling user instantiation into G object
