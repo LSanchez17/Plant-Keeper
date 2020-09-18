@@ -399,11 +399,12 @@ def add_garden():
 @app.route('/garden/<int:garden_id>', methods=['GET','POST'])
 def show_garden(garden_id):
     """Show current garden"""
-    if not g.user or (not session[LOGGED_IN_USER]):
+    which_garden = DescribeGarden.query.get_or_404(garden_id)
+
+    if not g.user or (session[LOGGED_IN_USER] != which_garden.user_id):
         flash('Access unauthorized', 'danger')
         return redirect('/')
 
-    which_garden = DescribeGarden.query.get_or_404(garden_id)
     which_user = User.query.get_or_404(g.user.id)
     which_plants = which_user.plants
     form = NewPlantForGarden()
@@ -426,12 +427,13 @@ def show_garden(garden_id):
 @app.route('/garden/<int:garden_id>/edit', methods=['GET','POST'])
 def edit_garden(garden_id):
     """Edit garden name and description"""
-    if not g.user or (not session[LOGGED_IN_USER]):
+    which_garden = DescribeGarden.query.get_or_404(garden_id)
+
+    if not g.user or (session[LOGGED_IN_USER] != which_garden.user_id):
         flash('Access unauthorized', 'danger')
         return redirect('/')
 
     form = GardenForm()
-    which_garden = DescribeGarden.query.get_or_404(garden_id)
 
     if form.validate_on_submit():
         which_garden = DescribeGarden.query.get_or_404(garden_id)
@@ -450,11 +452,11 @@ def edit_garden(garden_id):
 @app.route('/garden/<int:garden_id>/delete', methods=['POST'])
 def delete_garden(garden_id):
     """Delete garden user has"""
-    if not g.user or (not session[LOGGED_IN_USER]):
+    which_garden = DescribeGarden.query.get_or_404(garden_id)
+
+    if not g.user or (session[LOGGED_IN_USER] !== which_garden.user_id):
         flash('Access unauthorized', 'danger')
         return redirect('/')
-
-    which_garden = DescribeGarden.query.get_or_404(garden_id)
 
     db.session.delete(which_garden)
     db.session.commit()
