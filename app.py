@@ -11,9 +11,9 @@ from api_logic import get_weather, search_plants, search_images
 from reminders import get_reminders
 
 LOGGED_IN_USER = "logged_in_user"
-WEATHER_API_KEY_REMOVE_ME = os.environ.get('WEATHER_API', None)
-PLANT_API_KEY_REMOVE_ME = os.environ.get('PLANT_API', None)
-API_FLICKR_REMOVE_ME = os.environ.get('FLICKR_API', None)
+WEATHER_API_KEY_REMOVE_ME = os.environ.get('WEATHER_API')
+PLANT_API_KEY_REMOVE_ME = os.environ.get('PLANT_API')
+API_FLICKR_REMOVE_ME = os.environ.get('FLICKR_API')
 
 app = Flask(__name__)
 
@@ -67,43 +67,47 @@ def landing():
 def tutorial():
     """Tutorial for setting up user correctly"""
 
-    if g.user.fully_set_up:
-        return redirect(f'/hub/{g.user.id}')
-    else:
-        form = TutorialForm()
-
-        if form.validate_on_submit():
-            which_user = User.query.get_or_404(g.user.id)
-
-            which_user.first_name = form.first_name.data
-            which_user.last_name = form.last_name.data
-            which_user.profile_pic_url = form.profile_pic_url.data
-            which_user.location = form.location.data
-            which_user.fully_set_up = True
-        
-            db.session.add(which_user)
-            db.session.commit()
+    if g.user and (session[LOGGED_IN_USER] != 'logged in user'):
+        if g.user.fully_set_up:
             return redirect(f'/hub/{g.user.id}')
         else:
-            return render_template('tutorial.html', form=form)
-    
+            form = TutorialForm()
+
+            if form.validate_on_submit():
+                which_user = User.query.get_or_404(g.user.id)
+
+                which_user.first_name = form.first_name.data
+                which_user.last_name = form.last_name.data
+                which_user.profile_pic_url = form.profile_pic_url.data
+                which_user.location = form.location.data
+                which_user.fully_set_up = True
+        
+                db.session.add(which_user)
+                db.session.commit()
+                return redirect(f'/hub/{g.user.id}')
+            else:
+                return render_template('tutorial.html', form=form)
+    return redirect('/')
 
 @app.route('/hub/<int:user_id>')
 def hub_page(user_id):
     """Main user hub. Contains user information like their gardens, quick weather, and reminders"""
 
-    try:
-        which_user = User.query.get_or_404(user_id)
-        weather = get_weather(WEATHER_API_KEY_REMOVE_ME, g.user.location, False)
-        reminders = get_reminders(which_user)
-        garden = which_user.garden
+    if g.user or (session[LOGGED_IN_USER] == 'logged in user'):
 
-        data_list = [weather.json(), reminders, garden]
+        try:
+            which_user = User.query.get_or_404(user_id)
+            weather = get_weather(WEATHER_API_KEY_REMOVE_ME, g.user.location, False)
+            reminders = get_reminders(which_user)
+            garden = which_user.garden
 
-        return render_template('hub.html', data=data_list)
-    except:
-        message = 'Please add a plant to your account to start'
-        return render_template('hub.html', error=message)
+            data_list = [weather.json(), reminders, garden]
+
+            return render_template('hub.html', data=data_list)
+        except:
+            message = 'Please add a plant to your account to start'
+            return render_template('hub.html', error=message)
+    return redirect('/')
 
 @app.route('/register', methods=['GET','POST'])
 def register():
@@ -169,7 +173,7 @@ def logout():
 @app.route('/<int:user_id>/plants')
 def plant_page(user_id):
     """Displays plants tied to this user"""
-    if not g.user:
+    if not g.user or (session[LOGGED_IN_USER] == 'logged in user'):
         flash('Access unauthorized', 'danger')
         return redirect('/')
 
@@ -181,7 +185,7 @@ def plant_page(user_id):
 @app.route('/<int:user_id>/plants/add', methods=['GET','POST'])
 def add_plants(user_id):
     """Adds a plant to this user's account"""
-    if not g.user:
+    if not g.user or (session[LOGGED_IN_USER] == 'logged in user'):
         flash('Access unauthorized', 'danger')
         return redirect('/')
     
@@ -212,7 +216,7 @@ def add_plants(user_id):
 @app.route('/<int:user_id>/plants/edit/<int:plant_id>', methods=['GET','POST'])
 def edit_plants(user_id, plant_id):
     """Lets user update information on current plants attached to their account"""
-    if not g.user:
+    if not g.user or (session[LOGGED_IN_USER] == 'logged in user'):
         flash('Access unauthorized', 'danger')
         return redirect('/')
 
@@ -241,7 +245,7 @@ def edit_plants(user_id, plant_id):
 @app.route('/<int:user_id>/account')
 def view_account(user_id):
     """View user account"""
-    if not g.user:
+    if not g.user or (session[LOGGED_IN_USER] == 'logged in user'):
         flash('Access unauthorized', 'danger')
         return redirect('/')
 
@@ -251,10 +255,10 @@ def view_account(user_id):
 
     return render_template('/user/user_view.html', user=which_user, plant_list=list_of_plants, gardens=garden_number)
 
-@app.route('/<int:user_id>/account/edit')
+@app.route('/<int:user_id>/account/edit', methods=['GET','POST'])
 def edit_account(user_id):
     """Edit user information"""
-    if not g.user:
+    if not g.user or (session[LOGGED_IN_USER] == 'logged in user'):
         flash('Access unauthorized', 'danger')
         return redirect('/')
 
@@ -272,19 +276,21 @@ def edit_account(user_id):
         db.session.commit()
 
         flash('Information updated!', 'success')
-        return redirect(f'/{g,user.id}/account')
+        return redirect(f'/{g.user.id}/account')
 
     return render_template('/user/user_edit.html', form=form)
 
 @app.route('/<int:user_id>/account/delete', methods=['POST'])
 def delete_account(user_id):
     """Delete user account"""
-    if not g.user:
+    if not g.user or (session[LOGGED_IN_USER] == 'logged in user'):
         flash('Access unauthorized', 'danger')
         return redirect('/')
 
-    db.session.delete(g.user)
-    db.session.commit
+    which_garden = User.query.get_or_404(user_id)
+    
+    db.session.delete(which_garden)
+    db.session.commit()
     
     do_logout()
     flash('Account Deleted', 'success')
@@ -305,7 +311,7 @@ def general_weather():
 @app.route('/<int:user_id>/plants/search')
 def search_for_plants(user_id):
     """Search for plants and add them to your account"""
-    if not g.user:
+    if not g.user or (session[LOGGED_IN_USER] == 'logged in user'):
         flash('Access unauthorized', 'danger')
         return redirect('/')
 
@@ -366,7 +372,7 @@ def delete_plant(plant_id):
 @app.route('/garden/add', methods=['GET', 'POST'])
 def add_garden():
     """Add a garden to user account, a collection of plants"""
-    if not g.user:
+    if not g.user or (session[LOGGED_IN_USER] == 'logged in user'):
         flash('Access unauthorized', 'danger')
         return redirect('/')
 
@@ -386,6 +392,10 @@ def add_garden():
 @app.route('/garden/<int:garden_id>', methods=['GET','POST'])
 def show_garden(garden_id):
     """Show current garden"""
+    if not g.user or (session[LOGGED_IN_USER] == 'logged in user'):
+        flash('Access unauthorized', 'danger')
+        return redirect('/')
+
     which_garden = DescribeGarden.query.get_or_404(garden_id)
     which_user = User.query.get_or_404(g.user.id)
     which_plants = which_user.plants
@@ -409,7 +419,7 @@ def show_garden(garden_id):
 @app.route('/garden/<int:garden_id>/edit', methods=['GET','POST'])
 def edit_garden(garden_id):
     """Edit garden name and description"""
-    if not g.user:
+    if not g.user or (session[LOGGED_IN_USER] == 'logged in user'):
         flash('Access unauthorized', 'danger')
         return redirect('/')
 
@@ -433,7 +443,7 @@ def edit_garden(garden_id):
 @app.route('/garden/<int:garden_id>/delete', methods=['POST'])
 def delete_garden(garden_id):
     """Delete garden user has"""
-    if not g.user:
+    if not g.user or (session[LOGGED_IN_USER] == 'logged in user'):
         flash('Access unauthorized', 'danger')
         return redirect('/')
 
@@ -445,13 +455,9 @@ def delete_garden(garden_id):
     flash('Garden deleted', 'success')
     return redirect(f'/hub/{g.user.id}')
 
-@app.after_request
-def add_header(req):
-    """Add non-caching headers on every request."""
+@app.errorhandler(404)
+def page_not_found(err):
+    """Page non existent"""
 
-    req.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-    req.headers["Pragma"] = "no-cache"
-    req.headers["Expires"] = "0"
-    req.headers['Cache-Control'] = 'public, max-age=0'
-    return req
+    return render_template('404.html'), 404
 
