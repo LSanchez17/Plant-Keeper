@@ -379,7 +379,7 @@ def delete_plant(plant_id):
 @app.route('/garden/add', methods=['GET', 'POST'])
 def add_garden():
     """Add a garden to user account, a collection of plants"""
-    if not g.user or (session[LOGGED_IN_USER] != user_id):
+    if not g.user or (not session[LOGGED_IN_USER]):
         flash('Access unauthorized', 'danger')
         return redirect('/')
 
@@ -399,7 +399,7 @@ def add_garden():
 @app.route('/garden/<int:garden_id>', methods=['GET','POST'])
 def show_garden(garden_id):
     """Show current garden"""
-    if not g.user or (session[LOGGED_IN_USER] != user_id):
+    if not g.user or (not session[LOGGED_IN_USER]):
         flash('Access unauthorized', 'danger')
         return redirect('/')
 
@@ -426,7 +426,7 @@ def show_garden(garden_id):
 @app.route('/garden/<int:garden_id>/edit', methods=['GET','POST'])
 def edit_garden(garden_id):
     """Edit garden name and description"""
-    if not g.user or (session[LOGGED_IN_USER] != user_id):
+    if not g.user or (not session[LOGGED_IN_USER]):
         flash('Access unauthorized', 'danger')
         return redirect('/')
 
@@ -450,7 +450,7 @@ def edit_garden(garden_id):
 @app.route('/garden/<int:garden_id>/delete', methods=['POST'])
 def delete_garden(garden_id):
     """Delete garden user has"""
-    if not g.user or (session[LOGGED_IN_USER] != user_id):
+    if not g.user or (not session[LOGGED_IN_USER]):
         flash('Access unauthorized', 'danger')
         return redirect('/')
 
