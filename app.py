@@ -92,22 +92,27 @@ def tutorial():
 @app.route('/hub/<int:user_id>')
 def hub_page(user_id):
     """Main user hub. Contains user information like their gardens, quick weather, and reminders"""
+    try:
+        if (session[LOGGED_IN_USER] == user_id):
 
-    if g.user or (session[LOGGED_IN_USER] == 'logged in user'):
+            try:
+                which_user = User.query.get_or_404(user_id)
+                weather = get_weather(WEATHER_API_KEY_REMOVE_ME, g.user.location, False)
+                reminders = get_reminders(which_user)
+                garden = which_user.garden
 
-        try:
-            which_user = User.query.get_or_404(user_id)
-            weather = get_weather(WEATHER_API_KEY_REMOVE_ME, g.user.location, False)
-            reminders = get_reminders(which_user)
-            garden = which_user.garden
+                data_list = [weather.json(), reminders, garden]
 
-            data_list = [weather.json(), reminders, garden]
-
-            return render_template('hub.html', data=data_list)
-        except:
-            message = 'Please add a plant to your account to start'
-            return render_template('hub.html', error=message)
-    return redirect('/')
+                return render_template('hub.html', data=data_list)
+            except:
+                message = 'Please add a plant to your account to start'
+                return render_template('hub.html', error=message)
+        else:
+            flash ('Not authorized for that', 'danger')
+            return redirect('/')
+    except:
+        flash ('Not authorized for that', 'danger')
+        return redirect('/')
 
 @app.route('/register', methods=['GET','POST'])
 def register():
@@ -173,19 +178,21 @@ def logout():
 @app.route('/<int:user_id>/plants')
 def plant_page(user_id):
     """Displays plants tied to this user"""
-    if not g.user or (session[LOGGED_IN_USER] == 'logged in user'):
+    
+    if not g.user or (session[LOGGED_IN_USER] != user_id):
         flash('Access unauthorized', 'danger')
         return redirect('/')
+    
+    else:
+        which_user = User.query.get_or_404(user_id)
+        which_plants = Plants.query.filter(Plants.user_id == which_user.id)
 
-    which_user = User.query.get_or_404(user_id)
-    which_plants = Plants.query.filter(Plants.user_id == which_user.id)
-
-    return render_template('plants/plants_page.html', plants=which_plants)
+        return render_template('plants/plants_page.html', plants=which_plants)
 
 @app.route('/<int:user_id>/plants/add', methods=['GET','POST'])
 def add_plants(user_id):
     """Adds a plant to this user's account"""
-    if not g.user or (session[LOGGED_IN_USER] == 'logged in user'):
+    if not g.user or (session[LOGGED_IN_USER] != user_id):
         flash('Access unauthorized', 'danger')
         return redirect('/')
     
@@ -216,7 +223,7 @@ def add_plants(user_id):
 @app.route('/<int:user_id>/plants/edit/<int:plant_id>', methods=['GET','POST'])
 def edit_plants(user_id, plant_id):
     """Lets user update information on current plants attached to their account"""
-    if not g.user or (session[LOGGED_IN_USER] == 'logged in user'):
+    if not g.user or (session[LOGGED_IN_USER] != user_id):
         flash('Access unauthorized', 'danger')
         return redirect('/')
 
@@ -245,7 +252,7 @@ def edit_plants(user_id, plant_id):
 @app.route('/<int:user_id>/account')
 def view_account(user_id):
     """View user account"""
-    if not g.user or (session[LOGGED_IN_USER] == 'logged in user'):
+    if not g.user or (session[LOGGED_IN_USER] != user_id):
         flash('Access unauthorized', 'danger')
         return redirect('/')
 
@@ -258,7 +265,7 @@ def view_account(user_id):
 @app.route('/<int:user_id>/account/edit', methods=['GET','POST'])
 def edit_account(user_id):
     """Edit user information"""
-    if not g.user or (session[LOGGED_IN_USER] == 'logged in user'):
+    if not g.user or (session[LOGGED_IN_USER] != user_id):
         flash('Access unauthorized', 'danger')
         return redirect('/')
 
@@ -283,7 +290,7 @@ def edit_account(user_id):
 @app.route('/<int:user_id>/account/delete', methods=['POST'])
 def delete_account(user_id):
     """Delete user account"""
-    if not g.user or (session[LOGGED_IN_USER] == 'logged in user'):
+    if not g.user or (session[LOGGED_IN_USER] != user_id):
         flash('Access unauthorized', 'danger')
         return redirect('/')
 
@@ -311,7 +318,7 @@ def general_weather():
 @app.route('/<int:user_id>/plants/search')
 def search_for_plants(user_id):
     """Search for plants and add them to your account"""
-    if not g.user or (session[LOGGED_IN_USER] == 'logged in user'):
+    if not g.user or (session[LOGGED_IN_USER] != user_id):
         flash('Access unauthorized', 'danger')
         return redirect('/')
 
@@ -372,7 +379,7 @@ def delete_plant(plant_id):
 @app.route('/garden/add', methods=['GET', 'POST'])
 def add_garden():
     """Add a garden to user account, a collection of plants"""
-    if not g.user or (session[LOGGED_IN_USER] == 'logged in user'):
+    if not g.user or (session[LOGGED_IN_USER] != user_id):
         flash('Access unauthorized', 'danger')
         return redirect('/')
 
@@ -392,7 +399,7 @@ def add_garden():
 @app.route('/garden/<int:garden_id>', methods=['GET','POST'])
 def show_garden(garden_id):
     """Show current garden"""
-    if not g.user or (session[LOGGED_IN_USER] == 'logged in user'):
+    if not g.user or (session[LOGGED_IN_USER] != user_id):
         flash('Access unauthorized', 'danger')
         return redirect('/')
 
@@ -419,7 +426,7 @@ def show_garden(garden_id):
 @app.route('/garden/<int:garden_id>/edit', methods=['GET','POST'])
 def edit_garden(garden_id):
     """Edit garden name and description"""
-    if not g.user or (session[LOGGED_IN_USER] == 'logged in user'):
+    if not g.user or (session[LOGGED_IN_USER] != user_id):
         flash('Access unauthorized', 'danger')
         return redirect('/')
 
@@ -443,7 +450,7 @@ def edit_garden(garden_id):
 @app.route('/garden/<int:garden_id>/delete', methods=['POST'])
 def delete_garden(garden_id):
     """Delete garden user has"""
-    if not g.user or (session[LOGGED_IN_USER] == 'logged in user'):
+    if not g.user or (session[LOGGED_IN_USER] != user_id):
         flash('Access unauthorized', 'danger')
         return redirect('/')
 
