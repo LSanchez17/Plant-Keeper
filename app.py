@@ -454,7 +454,7 @@ def delete_garden(garden_id):
     """Delete garden user has"""
     which_garden = DescribeGarden.query.get_or_404(garden_id)
 
-    if not g.user or (session[LOGGED_IN_USER] !== which_garden.user_id):
+    if not g.user or (session[LOGGED_IN_USER] != which_garden.user_id):
         flash('Access unauthorized', 'danger')
         return redirect('/')
 
