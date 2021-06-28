@@ -1,4 +1,4 @@
-### API used for plants: https://trefle.io/
+### API used for plants: https://trefle.io/ <-- API has become deprecated :(
 ### API used for weather: https://www.weatherbit.io/api
 ### API used for images: https://www.flickr.com/services/api/
 
@@ -28,14 +28,4 @@ The following tech is used:
 - Bootstrap
 - HTML/CSS
 
-Upcoming features planned:
-- Removing plants from a garden directly (currently done by user removing plant on plant page)
-- Clearing notifications of water,trimming, replanting with one click
-- Improving plant search functionality for plants with no images/names from API
-- Improving site UI
-- Adding images to saved plant schema
-
-Stretch goals for commercialization opportunities
-- Let user search by photos uploaded
-- Adding file uploads
-- Farming support for home gardens
+* V2 coming later this year! Check out a sneak preview [here!](https://imgur.com/a/fbQsTiQ)
