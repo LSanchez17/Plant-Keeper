@@ -28,4 +28,4 @@ The following tech is used:
 - Bootstrap
 - HTML/CSS
 
-* V2 coming later this year! Check out a sneak preview [here!](https://imgur.com/a/fbQsTiQ)
+# V2 coming later this year! Check out a sneak preview [here!](https://imgur.com/a/fbQsTiQ)
